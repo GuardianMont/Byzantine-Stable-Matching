@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Byzantine Stable Matching — Interactive Companion</title>
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS
+       ============================================================ */
+
+    :root {
+      /* Brand */
+      --brand-orange: #D0732D;
+      --brand-purple: #8C426B;
+
+      /* Layout */
+      --bg: #F7F3F1;
+      --surface: #FFFFFF;
+      --sidebar-bg: #3A2532;
+
+      --text-main: #30272C;
+      --text-muted: #756970;
+      --text-light: #F8F4F6;
+
+      --border: #E5D9DE;
+
+      /* Party sides */
+      --party-l: #D0732D;
+      --party-r: #8C426B;
+
+      /* Protocol semantics */
+      --proposal: #60777C;
+      --matching: #2F7D6D;
+      --byzantine: #C84949;
+
+      --radius: 10px;
+
+      --mono:
+        "JetBrains Mono",
+        "Fira Code",
+        Consolas,
+        monospace;
+
+      --sans:
+        Inter,
+        system-ui,
+        sans-serif;
+    }
+
+
+    /* ============================================================
+       RESET
+       ============================================================ */
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--sans);
+
+      background: var(--bg);
+      color: var(--text-main);
+
+      display: flex;
+      flex-direction: column;
+
+      overflow: hidden;
+    }
+
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+
+    header {
+      height: var(--header-h);
+
+      background: var(--sidebar-bg);
+
+      display: flex;
+      align-items: center;
+
+      padding: 0 24px;
+      gap: 14px;
+
+      flex-shrink: 0;
+    }
+
+    .logo-mark {
+      width: 30px;
+      height: 30px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background: var(--accent-teal);
+      color: var(--sidebar-bg);
+
+      border-radius: 7px;
+
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    header h1 {
+      color: var(--text-light);
+
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    header h1 span {
+      color: var(--accent-teal);
+    }
+
+    .header-meta {
+      margin-left: auto;
+
+      font-family: var(--mono);
+      font-size: 10px;
+
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+
+    /* ============================================================
+       GLOBAL LAYOUT
+       ============================================================ */
+
+    .layout {
+      display: flex;
+
+      flex: 1;
+
+      overflow: hidden;
+    }
+
+
+    /* ============================================================
+       SIDEBAR
+       ============================================================ */
+
+    .sidebar {
+      width: var(--sidebar-w);
+
+      background: var(--sidebar-bg);
+
+      display: flex;
+      flex-direction: column;
+
+      flex-shrink: 0;
+
+      overflow-y: auto;
+
+      border-right:
+        1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .sidebar-section {
+      padding: 20px 16px 8px;
+    }
+
+    .sidebar-section-label {
+      margin-bottom: 7px;
+      padding: 0 8px;
+
+      font-size: 9px;
+      font-weight: 700;
+
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+
+      gap: 10px;
+
+      padding: 9px 10px;
+      margin-bottom: 2px;
+
+      border-radius: 7px;
+
+      cursor: pointer;
+
+      color: rgba(255, 255, 255, 0.65);
+
+      font-size: 12px;
+      font-weight: 500;
+
+      transition:
+        background 0.15s,
+        color 0.15s;
+    }
+
+    .nav-item.disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.07);
+      color: white;
+    }
+
+    .nav-item.active {
+      background: rgba(78, 205, 196, 0.15);
+      color: var(--accent-teal);
+    }
+
+    .nav-badge {
+      padding: 2px 6px;
+
+      border-radius: 4px;
+
+      background: rgba(255, 255, 255, 0.1);
+
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .nav-item.active .nav-badge {
+      background: var(--accent-teal);
+      color: var(--sidebar-bg);
+    }
+
+    .nav-tag {
+      margin-left: auto;
+
+      padding: 2px 6px;
+
+      border-radius: 4px;
+
+      background: rgba(78, 205, 196, 0.12);
+      color: var(--accent-teal);
+
+      font-family: var(--mono);
+      font-size: 9px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+
+      padding: 20px 18px;
+
+      font-family: var(--mono);
+      font-size: 9px;
+      line-height: 1.6;
+
+      color: rgba(255, 255, 255, 0.25);
+    }
+
+
+    /* ============================================================
+       MAIN AREA
+       ============================================================ */
+
+    .main {
+      flex: 1;
+
+      display: flex;
+      flex-direction: column;
+
+      overflow: hidden;
+    }
+
+    .screen {
+      display: none;
+
+      flex: 1;
+      flex-direction: column;
+
+      overflow: hidden;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+
+    /* ============================================================
+       WELCOME
+       ============================================================ */
+
+    .welcome {
+      flex: 1;
+
+      display: flex;
+      flex-direction: column;
+
+      align-items: center;
+      justify-content: center;
+
+      gap: 16px;
+
+      padding: 40px;
+
+      text-align: center;
+    }
+
+    .welcome-icon {
+      font-size: 46px;
+
+      color: var(--accent-teal);
+    }
+
+    .welcome h2 {
+      font-size: 24px;
+      letter-spacing: -0.02em;
+    }
+
+    .welcome p {
+      max-width: 560px;
+
+      color: var(--text-muted);
+
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .quick-links {
+      display: flex;
+      gap: 10px;
+
+      margin-top: 8px;
+    }
+
+    .quick-link {
+      padding: 9px 14px;
+
+      background: var(--surface);
+
+      border: 1px solid var(--border);
+      border-radius: 7px;
+
+      cursor: pointer;
+
+      font-size: 12px;
+      font-weight: 600;
+
+      transition:
+        border-color 0.15s,
+        color 0.15s;
+    }
+
+    .quick-link:hover {
+      border-color: var(--accent-teal);
+      color: var(--accent-teal);
+    }
+
+
+    /* ============================================================
+       EXAMPLE HEADER
+       ============================================================ */
+
+    .example-header {
+      padding: 20px 28px 0;
+
+      flex-shrink: 0;
+    }
+
+    .breadcrumb {
+      margin-bottom: 8px;
+
+      color: var(--text-muted);
+
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+
+    .breadcrumb span {
+      color: var(--accent-teal);
+    }
+
+    .example-header h2 {
+      margin-bottom: 6px;
+
+      font-size: 21px;
+      letter-spacing: -0.01em;
+    }
+
+    .example-header p {
+      max-width: 720px;
+
+      color: var(--text-muted);
+
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .paper-ref {
+      display: inline-block;
+
+      margin-top: 10px;
+
+      padding: 4px 9px;
+
+      border:
+        1px solid rgba(78, 205, 196, 0.2);
+      border-radius: 5px;
+
+      background:
+        rgba(78, 205, 196, 0.08);
+
+      color: var(--accent-teal);
+
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+
+
+    /* ============================================================
+       CONTENT
+       ============================================================ */
+
+    .content-area {
+      flex: 1;
+
+      overflow-y: auto;
+
+      padding: 20px 28px 32px;
+    }
+
+    .two-col {
+      display: grid;
+
+      grid-template-columns:
+        minmax(280px, 340px)
+        minmax(0, 1fr);
+
+      gap: 16px;
+
+      align-items: start;
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+
+      gap: 16px;
+    }
+
+
+    /* ============================================================
+       PANELS
+       ============================================================ */
+
+    .panel {
+      overflow: hidden;
+
+      background: var(--surface);
+
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 11px 15px;
+
+      background: #fafcfc;
+
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title {
+      color: var(--text-muted);
+
+      font-size: 10px;
+      font-weight: 700;
+
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .panel-body {
+      padding: 15px;
+    }
+
+
+    /* ============================================================
+       CONFIGURATION
+       ============================================================ */
+
+    .config-group {
+      display: flex;
+      flex-direction: column;
+
+      gap: 14px;
+    }
+
+    .config-row {
+      display: flex;
+      flex-direction: column;
+
+      gap: 6px;
+    }
+
+    .config-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .config-label > span:first-child {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .config-value {
+      padding: 2px 7px;
+
+      border-radius: 4px;
+
+      background:
+        rgba(78, 205, 196, 0.1);
+
+      color: var(--accent-teal);
+
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .party-description {
+      color: var(--text-muted);
+
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+
+
+    /* ============================================================
+       PREFERENCE LISTS
+       ============================================================ */
+
+    .pref-grid {
+      display: flex;
+      flex-direction: column;
+
+      gap: 8px;
+    }
+
+    .pref-row {
+      display: flex;
+      align-items: center;
+
+      gap: 7px;
+    }
+
+    .pref-party {
+      width: 28px;
+
+      text-align: right;
+
+      color: var(--text-muted);
+
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .pref-list {
+      display: flex;
+      flex-wrap: wrap;
+
+      gap: 4px;
+    }
+
+    .pref-chip {
+      padding: 3px 7px;
+
+      background: var(--bg);
+
+      border: 1px solid var(--border);
+      border-radius: 4px;
+
+      cursor: pointer;
+
+      color: var(--text-main);
+
+      font-family: var(--mono);
+      font-size: 10px;
+
+      -webkit-user-select: none;
+      user-select: none;
+
+      transition:
+        border-color 0.1s,
+        background 0.1s;
+    }
+
+    .pref-chip:hover {
+      border-color: var(--accent-teal);
+    }
+
+    .pref-chip.selected {
+      background: var(--accent-teal);
+
+      border-color: var(--accent-teal);
+
+      color: var(--sidebar-bg);
+
+      font-weight: 700;
+    }
+    
+    .interaction-hint {
+      display: flex;
+      align-items: center;
+
+      gap: 8px;
+
+      margin-bottom: 14px;
+
+      padding: 8px 10px;
+
+      background:
+        rgba(208, 115, 45, 0.07);
+
+      border:
+        1px solid rgba(208, 115, 45, 0.2);
+
+      border-radius: 6px;
+
+      color: var(--text-muted);
+
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .hint-icon {
+      color: var(--brand-orange);
+
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    /* ============================================================
+       BUTTONS
+       ============================================================ */
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 8px 13px;
+
+      border: none;
+      border-radius: 7px;
+
+      cursor: pointer;
+
+      font-family: var(--sans);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background: var(--accent-teal);
+      color: var(--sidebar-bg);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text-main);
+
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+
+      border: 1px solid var(--border);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+
+    /* ============================================================
+       GRAPH
+       ============================================================ */
+
+    .canvas-container {
+      position: relative;
+
+      width: 100%;
+      height: 360px;
+
+      overflow: hidden;
+
+      background: var(--bg);
+
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    #gs-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .canvas-placeholder {
+      position: absolute;
+      inset: 0;
+
+      display: flex;
+      flex-direction: column;
+
+      align-items: center;
+      justify-content: center;
+
+      gap: 8px;
+
+      background: var(--bg);
+
+      color: var(--text-muted);
+
+      pointer-events: none;
+    }
+
+    .canvas-placeholder .icon {
+      font-size: 30px;
+      opacity: 0.4;
+    }
+
+    .canvas-placeholder p {
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+
+
+    /* ============================================================
+       LEGEND
+       ============================================================ */
+
+    .legend {
+      display: flex;
+      gap: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+
+      gap: 5px;
+
+      color: var(--text-muted);
+
+      font-size: 10px;
+    }
+
+    .legend-dot {
+      width: 9px;
+      height: 9px;
+
+      border-radius: 50%;
+    }
+
+    .legend-dot.honest {
+      background: var(--honest);
+    }
+
+    .legend-dot.matching {
+      background: var(--matching);
+    }
+
+    .panel-body.compact {
+      padding: 12px;
+    }
+
+    .panel-body.trace-body {
+      padding: 10px;
+    }
+
+
+    /* ============================================================
+       TRACE
+       ============================================================ */
+
+    .trace-log {
+  min-height: 180px;
+  max-height: 360px;
+
+  overflow-y: auto;
+
+  padding: 14px 16px;
+
+  background: #FBF9FA;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.55;
+
+  /* Important */
+  white-space: normal;
+}
+
+    .trace-empty {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .trace-round-card {
+      padding: 12px 0;
+
+      border-bottom: 1px solid var(--border);
+    }
+
+    .trace-round-card:first-child {
+      padding-top: 0;
+    }
+
+    .trace-round-card:last-child {
+      border-bottom: none;
+    }
+
+    .trace-round-title {
+      margin-bottom: 8px;
+
+      color: var(--brand-purple);
+
+      font-size: 12px;
+      font-weight: 800;
+
+      letter-spacing: 0.08em;
+    }
+
+    .trace-row {
+      display: grid;
+
+      grid-template-columns: 78px minmax(0, 1fr);
+
+      gap: 10px;
+
+      margin: 5px 0;
+    }
+
+    .trace-label {
+      color: var(--text-muted);
+
+      font-size: 10px;
+      font-weight: 700;
+
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .trace-value {
+      color: var(--text-main);
+
+      font-size: 12.5px;
+    }
+
+    .trace-value.proposal {
+      color: var(--proposal);
+    }
+
+    .trace-value.accept {
+      color: var(--matching);
+    }
+
+    .trace-value.reject {
+      color: var(--byzantine);
+    }
+
+    .trace-value.match {
+      color: var(--matching);
+      font-weight: 700;
+    }
+    .t-round {
+      margin-top: 5px;
+
+      color: var(--text-main);
+
+      font-weight: 800;
+    }
+
+    .t-propose {
+      color: #2a6496;
+    }
+
+    .t-accept {
+      color: #2a9d8f;
+    }
+
+    .t-reject {
+      color: #e63946;
+    }
+
+    .t-match {
+      color: #bd8210;
+
+      font-weight: 700;
+    }
+
+    .t-info {
+      color: var(--text-muted);
+    }
+
+
+    /* ============================================================
+       STEP CONTROL
+       ============================================================ */
+
+    .step-controls {
+      color: var(--text-muted);
+
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+
+    .step-controls strong {
+      color: var(--text-main);
+    }
+
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+
+    @media (max-width: 900px) {
+      :root {
+        --sidebar-w: 210px;
+      }
+
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      .header-meta {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+
+<body>
+
+  <!-- ============================================================
+       HEADER
+       ============================================================ -->
+
+  <header>
+    <div class="logo-mark">B</div>
+
+    <h1>
+      <span>Byzantine</span> Stable Matching
+      — Interactive Companion
+    </h1>
+
+    <div class="header-meta">
+      University of Salerno · 2026
+    </div>
+  </header>
+
+
+  <!-- ============================================================
+       APPLICATION
+       ============================================================ -->
+
+  <div class="layout">
+
+    <!-- ==========================================================
+         SIDEBAR
+         ========================================================== -->
+
+    <nav class="sidebar">
+
+      <div class="sidebar-section">
+
+        <div class="sidebar-section-label">
+          Navigation
+        </div>
+
+        <div
+          class="nav-item active"
+          data-screen="welcome"
+          onclick="navigate(this, 'welcome')"
+        >
+          <span>⌂</span>
+          <span>Home</span>
+        </div>
+
+      </div>
+
+
+      <div class="sidebar-section">
+
+        <div class="sidebar-section-label">
+          Paper Examples
+        </div>
+
+        <div
+          class="nav-item"
+          data-screen="ex-81"
+          onclick="navigate(this, 'ex-81')"
+        >
+          <span class="nav-badge">8.1</span>
+
+          <span>
+            Gale–Shapley
+          </span>
+
+          <span class="nav-tag">
+            paper
+          </span>
+        </div>
+
+      </div>
+
+
+      <div class="sidebar-section">
+
+        <div class="sidebar-section-label">
+          Coming Next
+        </div>
+
+        <div
+          class="nav-item disabled"
+        >
+          <span class="nav-badge">8.2</span>
+          <span>Byzantine Behaviour</span>
+        </div>
+
+        <div
+          class="nav-item disabled"
+        >
+          <span class="nav-badge">8.3</span>
+          <span>Indistinguishability</span>
+        </div>
+
+        <div
+          class="nav-item disabled"
+        >
+          <span class="nav-badge">8.4</span>
+          <span>ΠbSM</span>
+        </div>
+
+      </div>
+
+
+      <div class="sidebar-footer">
+        Interactive companion to<br>
+        <strong>Stable Matching:</strong><br>
+        from classical to Byzantine
+        Stable Matching.
+      </div>
+
+    </nav>
+
+
+    <!-- ==========================================================
+         MAIN
+         ========================================================== -->
+
+    <main class="main">
+
+      <!-- ========================================================
+           HOME
+           ======================================================== -->
+
+      <section
+        class="screen active"
+        id="screen-welcome"
+      >
+
+        <div class="welcome">
+
+          <div class="welcome-icon">
+            ◈
+          </div>
+
+          <h2>
+            Byzantine Stable Matching
+          </h2>
+
+          <p>
+            Interactive examples accompanying the manuscript
+            <em>
+              Stable Matching: from classical to Byzantine
+              Stable Matching
+            </em>.
+            The examples reproduce the constructions discussed
+            in the paper and allow their parameters to be modified
+            interactively.
+          </p>
+
+          <div class="quick-links">
+
+            <button
+              class="quick-link"
+              onclick="
+                navigate(
+                  document.querySelector(
+                    '[data-screen=ex-81]'
+                  ),
+                  'ex-81'
+                )
+              "
+            >
+              8.1 · Gale–Shapley Execution
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ========================================================
+           EXAMPLE 8.1
+           ======================================================== -->
+
+      <section
+        class="screen"
+        id="screen-ex-81"
+      >
+
+        <div class="example-header">
+
+          <div class="breadcrumb">
+            examples /
+            <span>8.1</span>
+          </div>
+
+          <h2>
+            Gale–Shapley Execution
+          </h2>
+
+          <p>
+            Configure the preference lists and step through
+            the deferred-acceptance algorithm round by round.
+            Parties in L act as proposers and parties in R
+            as receivers.
+          </p>
+
+          <div class="paper-ref">
+            Chapter 2 · Gale–Shapley Algorithm
+          </div>
+
+        </div>
+
+
+        <div class="content-area">
+
+          <div class="two-col">
+
+            <!-- ==================================================
+                 LEFT COLUMN
+                 ================================================== -->
+
+            <div class="column">
+
+              <!-- Configuration -->
+
+              <div class="panel">
+
+                <div class="panel-header">
+                  <span class="panel-title">
+                    Configuration
+                  </span>
+                </div>
+
+                <div class="panel-body">
+
+                  <div class="config-group">
+
+                    <div class="config-row">
+
+                      <div class="config-label">
+
+                        <span>
+                          k · parties per side
+                        </span>
+
+                        <span
+                          class="config-value"
+                          id="gs-k-val"
+                        >
+                          3
+                        </span>
+
+                      </div>
+
+                      <input
+                        type="range"
+                        min="2"
+                        max="5"
+                        value="3"
+                        id="gs-k"
+
+                        oninput="
+                          document
+                            .getElementById('gs-k-val')
+                            .textContent = this.value;
+
+                          gsInit();
+                        "
+                      />
+
+                    </div>
+
+
+                    <div class="party-description">
+
+                      L =
+                      {l₁, …, l<sub id="gs-lk">k</sub>}
+
+                      &nbsp; · &nbsp;
+
+                      R =
+                      {r₁, …, r<sub id="gs-rk">k</sub>}
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <!-- Preference Lists -->
+
+              <div class="panel">
+
+                <div class="panel-header">
+
+                  <span class="panel-title">
+                    Preference Lists
+                  </span>
+
+                  <button
+                    class="btn btn-ghost"
+                    onclick="gsRandomize()"
+                  >
+                    ⟳ Randomize
+                  </button>
+
+                </div>
+
+                <div class="panel-body">
+
+                  <div
+                    class="interaction-hint"
+                    id="gs-pref-hint"
+                  >
+                    <span class="hint-icon">↔</span>
+
+                    <span>
+                      Click two entries in the same row
+                      to swap their ranking.
+                    </span>
+                  </div>
+
+                  <div
+                    id="gs-pref-grid"
+                    class="pref-grid"
+                  >
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <!-- Controls -->
+
+              <div class="btn-group">
+
+                <button
+                  class="btn btn-primary"
+                  id="gs-run"
+                  onclick="gsRun()"
+                >
+                  ▶ Run
+                </button>
+
+                <button
+                  class="btn btn-secondary"
+                  id="gs-step"
+                  onclick="gsStep()"
+                  disabled
+                >
+                  → Next Round
+                </button>
+
+                <button
+                  class="btn btn-ghost"
+                  onclick="gsReset()"
+                >
+                  ⟳ Reset
+                </button>
+
+              </div>
+
+
+              <div class="step-controls">
+
+                Round
+
+                <strong id="gs-step-n">
+                  —
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 RIGHT COLUMN
+                 ================================================== -->
+
+            <div class="column">
+
+              <!-- Graph -->
+
+              <div class="panel">
+
+                <div class="panel-header">
+
+                  <span class="panel-title">
+                    Matching State
+                  </span>
+
+                  <div class="legend">
+
+                    <div class="legend-item">
+
+                      <div
+                        class="legend-dot honest"
+                      >
+                      </div>
+
+                      Party
+
+                    </div>
+
+
+                    <div class="legend-item">
+
+                      <div
+                        class="legend-dot matching"
+                      >
+                      </div>
+
+                      Current match
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+                <div
+                  class="panel-body compact"
+                >
+
+                  <div
+                    class="canvas-container"
+                    id="gs-canvas-wrap"
+                  >
+
+                    <svg
+                      id="gs-svg"
+                      width="100%"
+                      height="100%"
+                    >
+                    </svg>
+
+
+                    <div
+                      class="canvas-placeholder"
+                      id="gs-placeholder"
+                    >
+
+                      <div class="icon">
+                        ◈
+                      </div>
+
+                      <p>
+                        Configure the example
+                        and press Run
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <!-- Trace -->
+
+              <div class="panel">
+
+                <div class="panel-header">
+
+                  <span class="panel-title">
+                    Execution Trace
+                  </span>
+
+                </div>
+
+                <div
+                  class="panel-body trace-body"
+                >
+
+                  <div
+                    class="trace-log"
+                    id="gs-trace"
+                  >
+
+                    <span class="trace-empty">
+                      Trace will appear here
+                      after running.
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <!-- ============================================================
+       JAVASCRIPT ENTRY POINT
+       ============================================================ -->
+
+  <script
+    type="module"
+    src="./js/app.js"
+  ></script>
+
+</body>
+</html>
