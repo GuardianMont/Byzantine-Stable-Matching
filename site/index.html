@@ -35,6 +35,8 @@
       --byzantine: #C84949;
 
       --radius: 10px;
+      --sidebar-w: 250px;
+
 
       --mono:
         "JetBrains Mono",
@@ -84,7 +86,7 @@
        ============================================================ */
 
     header {
-      height: var(--header-h);
+      height: 50px;
 
       background: var(--sidebar-bg);
 
@@ -440,23 +442,28 @@
       padding: 20px 28px 32px;
     }
 
-    .two-col {
+    .example-layout {
       display: grid;
-
-      grid-template-columns:
-        minmax(280px, 340px)
-        minmax(0, 1fr);
-
+      grid-template-columns: 340px minmax(0, 1fr);
       gap: 16px;
-
       align-items: start;
     }
 
-    .column {
-      display: flex;
-      flex-direction: column;
-
+    .left-stack,
+    .right-stack {
+      display: grid;
       gap: 16px;
+    }
+
+    .left-stack {
+      grid-template-rows: auto auto 1fr auto;
+    }
+
+    .right-stack {
+      display: grid;
+      gap: 16px;
+      grid-template-rows: auto auto;
+      align-content: start;
     }
 
 
@@ -498,7 +505,24 @@
     .panel-body {
       padding: 15px;
     }
+    
+    .left-stack .panel-body {
+      padding: 14px;
+    }
 
+    .left-stack .panel-header {
+      padding: 10px 14px;
+    }
+
+    .pref-panel {
+      min-height: 340px;
+    }
+
+    .pref-panel .panel-body {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
 
     /* ============================================================
        CONFIGURATION
@@ -547,7 +571,52 @@
 
     input[type="range"] {
       width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
     }
+
+/* Track */
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: #E7D9D2;
+  border-radius: 999px;
+}
+
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  background: #E7D9D2;
+  border-radius: 999px;
+  border: none;
+}
+
+/* Thumb */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+
+  background: var(--brand-orange);
+  box-shadow: 0 0 0 1px rgba(48, 39, 44, 0.12);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+
+  background: var(--brand-orange);
+  box-shadow: 0 0 0 1px rgba(48, 39, 44, 0.12);
+}
 
     .party-description {
       color: var(--text-muted);
@@ -668,9 +737,8 @@
        ============================================================ */
 
     .btn-group {
-      display: flex;
-      flex-wrap: wrap;
-
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 8px;
     }
 
@@ -792,8 +860,12 @@
       border-radius: 50%;
     }
 
-    .legend-dot.honest {
-      background: var(--honest);
+    .legend-dot.party-l {
+      background: var(--party-l);
+    }
+
+    .legend-dot.party-r {
+      background: var(--party-r);
     }
 
     .legend-dot.matching {
@@ -807,32 +879,45 @@
     .panel-body.trace-body {
       padding: 10px;
     }
+    
+    .graph-panel .panel-body {
+      padding: 12px;
+    }
 
 
     /* ============================================================
        TRACE
        ============================================================ */
 
+    .trace-panel {
+      min-height: 260px;
+    }
+
+
+    .trace-panel .panel-body {
+      padding: 10px;
+    }
+
     .trace-log {
-  min-height: 180px;
-  max-height: 360px;
+      min-height: 220px;
+      max-height: 380px;
 
-  overflow-y: auto;
+      overflow-y: auto;
 
-  padding: 14px 16px;
+      padding: 14px 16px;
 
-  background: #FBF9FA;
+      background: #FBF9FA;
 
-  border: 1px solid var(--border);
-  border-radius: 8px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
 
-  font-family: var(--mono);
-  font-size: 13px;
-  line-height: 1.55;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.55;
 
-  /* Important */
-  white-space: normal;
-}
+      /* Important */
+      white-space: normal;
+    }
 
     .trace-empty {
       color: var(--text-muted);
@@ -941,17 +1026,27 @@
        STEP CONTROL
        ============================================================ */
 
-    .step-controls {
+    .status-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 10px 12px;
+
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+
       color: var(--text-muted);
-
       font-family: var(--mono);
-      font-size: 10px;
+      font-size: 11px;
     }
 
-    .step-controls strong {
-      color: var(--text-main);
+    .status-strip strong {
+      color: var(--brand-purple);
+      font-size: 12px;
     }
-
+    
 
     /* ============================================================
        RESPONSIVE
@@ -962,8 +1057,12 @@
         --sidebar-w: 210px;
       }
 
-      .two-col {
+      .example-layout {
         grid-template-columns: 1fr;
+      }
+
+      .right-stack {
+        grid-template-rows: auto auto;
       }
 
       .header-meta {
@@ -1184,13 +1283,13 @@
 
         <div class="content-area">
 
-          <div class="two-col">
+          <div class="example-layout">
 
             <!-- ==================================================
                  LEFT COLUMN
                  ================================================== -->
 
-            <div class="column">
+            <div class="left-stack">
 
               <!-- Configuration -->
 
@@ -1262,8 +1361,23 @@
 
 
               <!-- Preference Lists -->
+               <!-- Controls -->
 
               <div class="panel">
+                <div class="panel-header">
+                  <span class="panel-title">Controls</span>
+                </div>
+                <div class="panel-body">
+                  <div class="btn-group">
+                    <button class="btn btn-primary" id="gs-run" onclick="gsRun()">▶ Start</button>
+                    <button class="btn btn-secondary" id="gs-step" onclick="gsStep()" disabled>→ Next Round</button>
+                    <button class="btn btn-ghost" onclick="gsReset()">⟳ Reset</button>
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="panel pref-panel">
 
                 <div class="panel-header">
 
@@ -1305,45 +1419,12 @@
               </div>
 
 
-              <!-- Controls -->
-
-              <div class="btn-group">
-
-                <button
-                  class="btn btn-primary"
-                  id="gs-run"
-                  onclick="gsRun()"
-                >
-                  ▶ Run
-                </button>
-
-                <button
-                  class="btn btn-secondary"
-                  id="gs-step"
-                  onclick="gsStep()"
-                  disabled
-                >
-                  → Next Round
-                </button>
-
-                <button
-                  class="btn btn-ghost"
-                  onclick="gsReset()"
-                >
-                  ⟳ Reset
-                </button>
-
-              </div>
+        
 
 
-              <div class="step-controls">
-
-                Round
-
-                <strong id="gs-step-n">
-                  —
-                </strong>
-
+              <div class="status-strip">
+                <span>Round</span>
+                <strong id="gs-step-n">—</strong>
               </div>
 
             </div>
@@ -1353,11 +1434,10 @@
                  RIGHT COLUMN
                  ================================================== -->
 
-            <div class="column">
-
+            <div class="right-stack">
               <!-- Graph -->
 
-              <div class="panel">
+              <div class="panel graph-panel">
 
                 <div class="panel-header">
 
@@ -1368,36 +1448,25 @@
                   <div class="legend">
 
                     <div class="legend-item">
-
-                      <div
-                        class="legend-dot honest"
-                      >
-                      </div>
-
-                      Party
-
+                      <div class="legend-dot party-l"></div>
+                      L
                     </div>
 
+                    <div class="legend-item">
+                      <div class="legend-dot party-r"></div>
+                      R
+                    </div>
 
                     <div class="legend-item">
-
-                      <div
-                        class="legend-dot matching"
-                      >
-                      </div>
-
+                      <div class="legend-dot matching"></div>
                       Current match
-
                     </div>
 
                   </div>
 
                 </div>
 
-
-                <div
-                  class="panel-body compact"
-                >
+                <div class="panel-body compact">
 
                   <div
                     class="canvas-container"
@@ -1408,9 +1477,7 @@
                       id="gs-svg"
                       width="100%"
                       height="100%"
-                    >
-                    </svg>
-
+                    ></svg>
 
                     <div
                       class="canvas-placeholder"
@@ -1423,7 +1490,7 @@
 
                       <p>
                         Configure the example
-                        and press Run
+                        and press Start
                       </p>
 
                     </div>
@@ -1437,7 +1504,7 @@
 
               <!-- Trace -->
 
-              <div class="panel">
+              <div class="panel trace-panel">
 
                 <div class="panel-header">
 
