@@ -6,6 +6,12 @@ import {
   gsReset,
 } from "./examples/gale-shapley-ui.js";
 
+import {
+  ncInit,
+  ncStart,
+  ncStep,
+  ncReset,
+} from "./examples/noncompetition-ui.js";
 
 /* ================================================================
    NAVIGATION
@@ -83,13 +89,17 @@ window.gsRun = gsRun;
 window.gsStep = gsStep;
 window.gsReset = gsReset;
 
-
+window.ncInit = ncInit;
+window.ncStart = ncStart;
+window.ncStep = ncStep;
+window.ncReset = ncReset;
 /* ================================================================
    APPLICATION INITIALIZATION
    ================================================================ */
 
 function initApplication() {
   gsInit();
+  ncInit();
 
   console.info(
     "Byzantine Stable Matching Interactive Companion initialized."
