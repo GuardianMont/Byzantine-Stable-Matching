@@ -1,0 +1,313 @@
+/* ============================================================
+   EXAMPLE 8.3 — INDISTINGUISHABILITY
+   ============================================================ */
+
+.ind-canvas {
+  height: 440px;
+}
+
+
+/* Intro / explanation */
+
+.ind-message {
+  padding: 14px 16px;
+
+  background: #FBF9FA;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  color: var(--text-muted);
+
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.ind-message strong {
+  color: var(--text-main);
+}
+
+
+/* Mathematical statements */
+
+.ind-equation {
+  margin: 9px 0;
+
+  padding: 7px 10px;
+
+  background:
+    rgba(140, 66, 107, 0.07);
+
+  border:
+    1px solid
+    rgba(140, 66, 107, 0.12);
+
+  border-radius: 6px;
+
+  color: var(--brand-purple);
+
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+
+  text-align: center;
+}
+
+
+/* Proof card */
+
+.ind-proof-card {
+  padding: 14px 16px;
+
+  background: #FBF9FA;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  color: var(--text-muted);
+
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.ind-proof-title {
+  margin-bottom: 12px;
+
+  color: var(--brand-purple);
+
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+}
+
+
+.ind-proof-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 14px;
+
+  padding: 6px 0;
+
+  border-bottom:
+    1px solid rgba(229, 217, 222, 0.7);
+}
+
+.ind-proof-row span {
+  color: var(--text-muted);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ind-proof-row strong {
+  color: var(--text-main);
+
+  font-family: var(--mono);
+  font-size: 10.5px;
+
+  text-align: right;
+}
+
+
+.ind-proof-arrow {
+  margin: 8px 0;
+
+  color: var(--text-muted);
+
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 800;
+
+  text-align: center;
+}
+
+
+/* Forced conclusions */
+
+.ind-conclusion {
+  margin-top: 10px;
+
+  padding: 8px 10px;
+
+  border-radius: 6px;
+
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 800;
+
+  text-align: center;
+}
+
+.ind-conclusion.pass {
+  color: var(--matching);
+
+  background:
+    rgba(47, 125, 109, 0.08);
+
+  border:
+    1px solid
+    rgba(47, 125, 109, 0.22);
+}
+
+.ind-conclusion.fail {
+  color: var(--byzantine);
+
+  background:
+    rgba(200, 73, 73, 0.08);
+
+  border:
+    1px solid
+    rgba(200, 73, 73, 0.25);
+}
+
+
+/* Local views */
+
+.ind-view-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+
+  margin-top: 14px;
+}
+
+
+.ind-view-card {
+  padding: 12px;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: 7px;
+
+  text-align: center;
+}
+
+.ind-view-card > strong {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: var(--text-main);
+
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.ind-view-card > span {
+  color: var(--text-muted);
+
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+
+/* Final contradiction */
+
+.ind-contradiction {
+  margin-top: 14px;
+
+  padding: 13px 14px;
+
+  background:
+    rgba(200, 73, 73, 0.055);
+
+  border:
+    1px solid
+    rgba(200, 73, 73, 0.3);
+
+  border-radius: 8px;
+}
+
+.ind-contradiction > strong {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: var(--byzantine);
+
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+}
+
+.ind-contradiction p {
+  color: var(--text-muted);
+
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+
+/* 8.3 setup panel */
+
+.ind-setup-grid {
+  display: grid;
+  gap: 9px;
+}
+
+.ind-setup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding-bottom: 8px;
+
+  border-bottom:
+    1px solid var(--border);
+}
+
+.ind-setup-row:last-child {
+  padding-bottom: 0;
+
+  border-bottom: none;
+}
+
+.ind-setup-label {
+  color: var(--text-muted);
+
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+.ind-setup-value {
+  color: var(--text-main);
+
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+
+/* Legend */
+
+.legend-dot.simulated {
+  background: transparent;
+
+  border:
+    2px dashed
+    var(--byzantine);
+}
+
+
+/* Responsive */
+
+@media (max-width: 650px) {
+  .ind-view-grid {
+    grid-template-columns: 1fr;
+  }
+}

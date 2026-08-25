@@ -1,0 +1,21 @@
+/* ============================================================
+       RESPONSIVE
+       ============================================================ */
+
+    @media (max-width: 900px) {
+      :root {
+        --sidebar-w: 210px;
+      }
+
+      .example-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .right-stack {
+        grid-template-rows: auto auto;
+      }
+
+      .header-meta {
+        display: none;
+      }
+    }
