@@ -13,6 +13,13 @@ import {
   ncReset,
 } from "./examples/noncompetition-ui.js";
 
+import {
+  indInit,
+  indStart,
+  indStep,
+  indReset,
+} from "./examples/indistinguishability-ui.js";
+
 /* ================================================================
    NAVIGATION
    ================================================================ */
@@ -93,6 +100,11 @@ window.ncInit = ncInit;
 window.ncStart = ncStart;
 window.ncStep = ncStep;
 window.ncReset = ncReset;
+
+window.indInit = indInit;
+window.indStart = indStart;
+window.indStep = indStep;
+window.indReset = indReset;
 /* ================================================================
    APPLICATION INITIALIZATION
    ================================================================ */
@@ -100,6 +112,7 @@ window.ncReset = ncReset;
 function initApplication() {
   gsInit();
   ncInit();
+  indInit();
 
   console.info(
     "Byzantine Stable Matching Interactive Companion initialized."
