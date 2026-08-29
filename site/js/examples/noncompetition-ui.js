@@ -13,20 +13,14 @@ let stage = 0;
    ================================================================ */
 
 export function ncInit() {
-  scenario =
-    createNonCompetitionScenario();
-
+  scenario = createNonCompetitionScenario();
   stage = 0;
 
   renderPreferences();
   renderGraph();
   renderPropertyCheck();
-
   updateStatus();
-
-  document
-    .getElementById("nc-next")
-    .disabled = true;
+  updateControls();
 }
 
 
@@ -40,10 +34,21 @@ export function ncStart() {
   renderGraph();
   renderPropertyCheck();
   updateStatus();
+  updateControls();
+}
 
-  document
-    .getElementById("nc-next")
-    .disabled = false;
+
+export function ncBack() {
+  if (stage <= 0) {
+    return;
+  }
+
+  stage -= 1;
+
+  renderGraph();
+  renderPropertyCheck();
+  updateStatus();
+  updateControls();
 }
 
 
@@ -57,12 +62,7 @@ export function ncStep() {
   renderGraph();
   renderPropertyCheck();
   updateStatus();
-
-  if (stage === 3) {
-    document
-      .getElementById("nc-next")
-      .disabled = true;
-  }
+  updateControls();
 }
 
 
@@ -632,6 +632,37 @@ function updateStatus() {
 
   status.textContent =
     labels[stage];
+}
+
+
+function updateControls() {
+  const start =
+    document.getElementById(
+      "nc-start"
+    );
+
+  const back =
+    document.getElementById(
+      "nc-back"
+    );
+
+  const next =
+    document.getElementById(
+      "nc-next"
+    );
+
+
+  if (start) {
+    start.disabled = stage > 0;
+  }
+
+  if (back) {
+    back.disabled = stage === 0;
+  }
+
+  if (next) {
+    next.disabled = stage === 0 || stage === 3;
+  }
 }
 
 

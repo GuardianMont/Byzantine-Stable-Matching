@@ -5,1258 +5,632 @@ import {
   getPartySide,
 } from "../core/indistinguishability.js";
 
-
 let scenario = null;
 let stage = 0;
 
-
 /* ================================================================
-   INITIALIZATION
+   INITIALIZATION / CONTROLS
    ================================================================ */
 
 export function indInit() {
-  scenario =
-    createIndistinguishabilityScenario();
-
+  scenario = createIndistinguishabilityScenario();
   stage = 0;
-
-  renderGraph();
-  renderExplanation();
-  updateStatus();
-
-  setNextEnabled(false);
+  render();
+  updateControls();
 }
-
-
-/* ================================================================
-   CONTROLS
-   ================================================================ */
 
 export function indStart() {
   stage = 1;
-
-  renderGraph();
-  renderExplanation();
-  updateStatus();
-
-  setNextEnabled(true);
+  render();
+  updateControls();
 }
 
+export function indBack() {
+  if (stage <= 0) return;
+
+  stage -= 1;
+  render();
+  updateControls();
+}
 
 export function indStep() {
-  if (stage >= 4) {
-    return;
-  }
+  if (stage >= 4) return;
 
   stage += 1;
-
-  renderGraph();
-  renderExplanation();
-  updateStatus();
-
-
-  if (stage === 4) {
-    setNextEnabled(false);
-  }
+  render();
+  updateControls();
 }
-
 
 export function indReset() {
   indInit();
 }
 
+function render() {
+  renderGraph();
+  renderExplanation();
+  updateStatus();
+}
 
 /* ================================================================
-   GRAPH
+   GRAPH ROUTER
    ================================================================ */
 
 function renderGraph() {
-  const svg =
-    document.getElementById(
-      "ind-svg"
-    );
-
-  /*
-   * This guard is intentional:
-   * adding this module must not break app.js
-   * before the 8.3 HTML screen exists.
-   */
-  if (!svg) {
-    return;
-  }
-
+  const svg = document.getElementById("ind-svg");
+  if (!svg) return;
 
   svg.innerHTML = "";
-
-  svg.setAttribute(
-    "viewBox",
-    "0 0 760 440"
-  );
-
+  svg.setAttribute("viewBox", "0 0 760 560");
 
   if (stage === 0) {
-    renderOriginalSystem(
-      svg
-    );
-
-    return;
+    renderOriginalSystem(svg);
+  } else if (stage === 1) {
+    renderDuplicatedSystem(svg);
+  } else if (stage === 2) {
+    renderExecutionScene(svg, "A");
+  } else if (stage === 3) {
+    renderExecutionScene(svg, "B");
+  } else {
+    renderFinalExecution(svg);
   }
-
-
-  if (stage === 1) {
-    renderDuplicatedSystem(
-      svg
-    );
-
-    return;
-  }
-
-
-  if (stage === 2) {
-    renderExecution(
-      svg,
-      "A"
-    );
-
-    return;
-  }
-
-
-  if (stage === 3) {
-    renderExecution(
-      svg,
-      "B"
-    );
-
-    return;
-  }
-
-
-  renderFinalExecution(
-    svg
-  );
 }
-
 
 /* ================================================================
    STAGE 0 — ORIGINAL SYSTEM
    ================================================================ */
 
-function renderOriginalSystem(
-  svg
-) {
-  const colors =
-    getColors();
+function renderOriginalSystem(svg) {
+  const colors = getColors();
 
-
-  drawText(
-    svg,
-    175,
-    55,
-    "L",
-    {
-      fill:
-        colors.partyL,
-
-      size: 14,
-      weight: 800,
-    }
-  );
-
-
-  drawText(
-    svg,
-    585,
-    55,
-    "R",
-    {
-      fill:
-        colors.partyR,
-
-      size: 14,
-      weight: 800,
-    }
-  );
-
-
-  drawText(
-    svg,
-    380,
-    55,
-    "ORIGINAL SYSTEM",
-    {
-      fill:
-        colors.muted,
-
-      size: 11,
-      weight: 700,
-    }
-  );
-
+  drawSceneTitle(svg, "ORIGINAL SYSTEM", "the real six-party setting");
+  drawSideLabels(svg, colors, 100);
 
   const positions = {
-    a: {
-      x: 175,
-      y: 130,
-    },
-
-    b: {
-      x: 175,
-      y: 220,
-    },
-
-    c: {
-      x: 175,
-      y: 310,
-    },
-
-    u: {
-      x: 585,
-      y: 130,
-    },
-
-    v: {
-      x: 585,
-      y: 220,
-    },
-
-    w: {
-      x: 585,
-      y: 310,
-    },
+    a: { x: 175, y: 170 },
+    b: { x: 175, y: 290 },
+    c: { x: 175, y: 410 },
+    u: { x: 585, y: 170 },
+    v: { x: 585, y: 290 },
+    w: { x: 585, y: 410 },
   };
 
-
-  for (
-    const party
-    of scenario.original.L
-  ) {
-    drawParty(
-      svg,
-      party,
-      positions[party],
-      colors.partyL
-    );
+  for (const party of scenario.original.L) {
+    drawParty(svg, party, positions[party], colors.partyL, { radius: 31 });
   }
 
-
-  for (
-    const party
-    of scenario.original.R
-  ) {
-    drawParty(
-      svg,
-      party,
-      positions[party],
-      colors.partyR
-    );
+  for (const party of scenario.original.R) {
+    drawParty(svg, party, positions[party], colors.partyR, { radius: 31 });
   }
 
+  drawBottomNote(
+    svg,
+    "k = 3   ·   tL = 1   ·   tR = 1   ·   assume a correct protocol Π exists",
+    colors.muted,
+    525
+  );
+}
 
-  drawText(
+/* ================================================================
+   STAGE 1 — DUPLICATED PROOF GADGET
+   ================================================================ */
+
+function renderDuplicatedSystem(svg) {
+  const colors = getColors();
+  const positions = getDuplicatedPositions();
+
+  drawSceneTitle(
+    svg,
+    "DUPLICATED PROOF GADGET",
+    "two virtual copies of every original party"
+  );
+  drawSideLabels(svg, colors, 105);
+
+  drawRoundedLabel(
     svg,
     380,
-    390,
-    "k = 3   ·   tL = 1   ·   tR = 1",
-    {
-      fill:
-        colors.muted,
-
-      size: 12,
-      weight: 700,
-    }
+    115,
+    "COPY 1 · c₁ ↔ v₁ are mutual favorites",
+    colors.proposal,
+    { width: 310, height: 30, fontSize: 11, opaque: true }
   );
-}
 
-
-/* ================================================================
-   STAGE 1 — DUPLICATED SYSTEM
-   ================================================================ */
-
-function renderDuplicatedSystem(
-  svg
-) {
-  const colors =
-    getColors();
-
-  const positions =
-    getDuplicatedPositions();
-
-
-  drawDuplicatedLabels(
+  drawRoundedLabel(
     svg,
-    colors
+    380,
+    320,
+    "COPY 2 · a₂ ↔ v₂ are mutual favorites",
+    colors.proposal,
+    { width: 310, height: 30, fontSize: 11, opaque: true }
   );
 
-
-  /*
-   * Relevant mutual favorites.
-   */
-
-  for (
-    const [left, right]
-    of scenario
-      .duplicated
-      .mutualFavorites
-  ) {
-    drawEdge(
-      svg,
-      positions[left],
-      positions[right],
-      {
-        color:
-          colors.proposal,
-
-        width: 2.5,
-
-        dashed:
-          true,
-      }
-    );
-
-    drawSmallEdgeLabel(
-      svg,
-      positions[left],
-      positions[right],
-      "mutual favorites",
-      colors.proposal
-    );
+  for (const [left, right] of scenario.duplicated.mutualFavorites) {
+    drawEdge(svg, positions[left], positions[right], {
+      color: colors.proposal,
+      width: 2.5,
+      dashed: true,
+    });
   }
 
-
-  drawAllVirtualParties(
-    svg,
-    positions,
-    null
-  );
-}
-
-
-/* ================================================================
-   STAGES 2 / 3 — EXECUTION A / B
-   ================================================================ */
-
-function renderExecution(
-  svg,
-  executionKey
-) {
-  const colors =
-    getColors();
-
-  const positions =
-    getDuplicatedPositions();
-
-  const execution =
-    getExecution(
-      scenario,
-      executionKey
-    );
-
-
-  drawDuplicatedLabels(
-    svg,
-    colors
-  );
-
-
-  /*
-   * Draw mutual-favorite information first.
-   */
-
-  for (
-    const [left, right]
-    of scenario
-      .duplicated
-      .mutualFavorites
-  ) {
-    drawEdge(
-      svg,
-      positions[left],
-      positions[right],
-      {
-        color:
-          colors.proposal,
-
-        width: 2,
-
-        dashed:
-          true,
-
-        opacity:
-          0.4,
-      }
-    );
+  for (const party of scenario.duplicated.L) {
+    drawParty(svg, party, positions[party], colors.partyL, { radius: 23 });
   }
 
-
-  /*
-   * Forced decision in the current execution.
-   */
-
-  for (
-    const [left, right]
-    of execution.forcedMatches
-  ) {
-    drawEdge(
-      svg,
-      positions[left],
-      positions[right],
-      {
-        color:
-          colors.matching,
-
-        width: 5,
-      }
-    );
-
-    drawSmallEdgeLabel(
-      svg,
-      positions[left],
-      positions[right],
-      "forced by simplified stability",
-      colors.matching
-    );
+  for (const party of scenario.duplicated.R) {
+    drawParty(svg, party, positions[party], colors.partyR, { radius: 23 });
   }
 
-
-  drawAllVirtualParties(
+  drawBottomNote(
     svg,
-    positions,
-    execution
-  );
-
-
-  drawExecutionBadge(
-    svg,
-    executionKey,
-    execution.simulators
+    "Proof device only — A, B and C are separate executions, not consecutive rounds.",
+    colors.brandPurple,
+    535
   );
 }
-
 
 /* ================================================================
-   STAGE 4 — FINAL EXECUTION
+   STAGES 2 / 3 — EXECUTIONS A AND B
+   Only honest parties are drawn. The simulated environment is
+   described explicitly instead of using faded virtual nodes.
    ================================================================ */
 
-function renderFinalExecution(
-  svg
-) {
-  const colors =
-    getColors();
+function renderExecutionScene(svg, executionKey) {
+  const colors = getColors();
+  const execution = getExecution(scenario, executionKey);
+  const positions = getExecutionPositions(execution);
 
-  const positions =
-    getDuplicatedPositions();
-
-  const execution =
-    getExecution(
-      scenario,
-      "C"
-    );
-
-
-  drawDuplicatedLabels(
+  drawSceneTitle(
     svg,
-    colors
+    `EXECUTION ${executionKey}`,
+    "a separate hypothetical execution of the same protocol"
   );
 
-
-  /*
-   * Decisions inherited through
-   * indistinguishability.
-   */
-
-  drawEdge(
+  drawRoundedLabel(
     svg,
-    positions.a2,
-    positions.v2,
-    {
-      color:
-        colors.matching,
-
-      width: 5,
-    }
+    380,
+    98,
+    "FOCUSED VIEW · only honest parties are drawn",
+    colors.muted,
+    { width: 330, height: 30, fontSize: 10.5, opaque: true }
   );
 
+  drawSideLabels(svg, colors, 145);
 
-  drawEdge(
+  const [forcedLeft, forcedRight] = execution.forcedMatches[0];
+
+  drawRoundedLabel(
     svg,
-    positions.c1,
-    positions.v1,
-    {
-      color:
-        colors.matching,
-
-      width: 5,
-    }
+    380,
+    168,
+    `${prettyParty(forcedLeft)} ↔ ${prettyParty(forcedRight)} are honest mutual favorites`,
+    colors.proposal,
+    { width: 340, height: 30, fontSize: 11, opaque: true }
   );
 
+  for (const party of execution.honest) {
+    const side = getPartySide(party);
+    const color = side === "L" ? colors.partyL : colors.partyR;
+    drawParty(svg, party, positions[party], color, { radius: 32 });
+  }
 
-  /*
-   * v1 and v2 now correspond to
-   * the same real Byzantine party v.
-   */
+  drawEdge(svg, positions[forcedLeft], positions[forcedRight], {
+    color: colors.matching,
+    width: 5,
+  });
 
-  drawCollapsedPartyRelation(
+  drawDecisionBadge(
     svg,
-    positions.v1,
-    positions.v2,
-    colors.byzantine
+    380,
+    435,
+    `${prettyParty(forcedLeft)} must choose ${prettyParty(forcedRight)}`,
+    colors.matching,
+    280
   );
 
-
-  drawAllVirtualParties(
-    svg,
-    positions,
-    execution
-  );
-
-
-  /*
-   * Local-view badges.
-   */
-
-  drawViewBadge(
-    svg,
-    positions.a2.x - 80,
-    positions.a2.y,
-    "same view as A",
-    colors.brandOrange
-  );
-
-
-  drawViewBadge(
-    svg,
-    positions.c1.x - 80,
-    positions.c1.y,
-    "same view as B",
-    colors.brandPurple
-  );
-
-
-  drawExecutionBadge(
-    svg,
-    "C",
-    execution.simulators
-  );
+  drawSimulatorBox(svg, execution.simulators, colors);
 }
 
+/* ================================================================
+   STAGE 4 — EXECUTION C / CONTRADICTION
+   This is intentionally not a 12-node graph. The point of the last
+   stage is the two local views and the single real Byzantine v.
+   ================================================================ */
+
+function renderFinalExecution(svg) {
+  const colors = getColors();
+  const execution = getExecution(scenario, "C");
+
+  drawSceneTitle(
+    svg,
+    "EXECUTION C",
+    "the two local views now force incompatible outputs"
+  );
+
+  drawMultiLineCard(
+    svg,
+    205,
+    130,
+    [
+      "a₂'s local view in C = Execution A",
+      "same messages ⇒ a₂ must keep A's decision",
+    ],
+    colors.brandOrange,
+    { width: 300, height: 76 }
+  );
+
+  drawMultiLineCard(
+    svg,
+    555,
+    130,
+    [
+      "c₁'s local view in C = Execution B",
+      "same messages ⇒ c₁ must keep B's decision",
+    ],
+    colors.brandPurple,
+    { width: 300, height: 76 }
+  );
+
+  const positions = {
+    a2: { x: 205, y: 290 },
+    c1: { x: 555, y: 290 },
+    v: { x: 380, y: 410 },
+  };
+
+  drawRoundedLabel(
+    svg,
+    positions.a2.x,
+    228,
+    "keeps choice v₂",
+    colors.matching,
+    { width: 160, height: 28, fontSize: 10.5, opaque: true }
+  );
+
+  drawRoundedLabel(
+    svg,
+    positions.c1.x,
+    228,
+    "keeps choice v₁",
+    colors.matching,
+    { width: 160, height: 28, fontSize: 10.5, opaque: true }
+  );
+
+  drawParty(svg, "a2", positions.a2, colors.partyL, { radius: 33 });
+  drawParty(svg, "c1", positions.c1, colors.partyL, { radius: 33 });
+  drawByzantineParty(svg, "v", positions.v, colors.partyR, colors.byzantine);
+
+  drawEdge(svg, positions.a2, positions.v, {
+    color: colors.matching,
+    width: 5,
+  });
+
+  drawEdge(svg, positions.c1, positions.v, {
+    color: colors.matching,
+    width: 5,
+  });
+
+  drawRoundedLabel(
+    svg,
+    380,
+    480,
+    "v₁ and v₂ are two simulated views of the same real Byzantine party v",
+    colors.byzantine,
+    { width: 510, height: 32, fontSize: 10.5, opaque: true }
+  );
+
+  drawDecisionBadge(
+    svg,
+    380,
+    530,
+    "out(a₂) = out(c₁) = v   →   Non-Competition violated",
+    colors.byzantine,
+    430
+  );
+
+  void execution;
+}
 
 /* ================================================================
    EXPLANATION PANEL
    ================================================================ */
 
 function renderExplanation() {
-  const root =
-    document.getElementById(
-      "ind-explanation"
-    );
-
-
-  if (!root) {
-    return;
-  }
-
+  const root = document.getElementById("ind-explanation");
+  if (!root) return;
 
   if (stage === 0) {
     root.innerHTML = `
       <div class="ind-message">
+        <strong>What are we proving?</strong>
+        Assume, for contradiction, that a protocol Π solves the
+        fully-connected unauthenticated case with
+        <span class="ind-inline-math">k = 3</span> and
+        <span class="ind-inline-math">t<sub>L</sub> = t<sub>R</sub> = 1</span>.
 
-        <strong>
-          Impossibility setup.
-        </strong>
-
-        Consider the fully-connected
-        unauthenticated case with
-
-        <div class="ind-equation">
-          k = 3,
-          &nbsp;
-          t<sub>L</sub> = t<sub>R</sub> = 1.
+        <div class="ind-proof-note">
+          This visualizer shows stages of an impossibility proof.
+          They are <strong>not protocol rounds</strong>.
         </div>
-
-        Press <strong>Start</strong>
-        to construct the duplicated system.
-
       </div>
     `;
-
     return;
   }
-
 
   if (stage === 1) {
     root.innerHTML = `
       <div class="ind-message">
+        <strong>Build the proof gadget.</strong>
+        Each original party is replaced by two <em>virtual vertices</em>, identified
+        by subscripts 1 and 2. These are not two rounds of the same real process.
+        The proof assigns inputs to the virtual vertices and fixes only the two
+        mutual-favorite relations needed later:
 
-        <strong>
-          Duplicated system.
-        </strong>
+        <div class="ind-equation">c₁ ↔ v₁</div>
+        <div class="ind-equation">a₂ ↔ v₂</div>
 
-        Every original party is represented
-        by two virtual copies.
-
-        The proof fixes two relevant
-        mutual-favorite pairs:
-
-        <div class="ind-equation">
-          c₁ ↔ v₁
+        <div class="ind-proof-note accent">
+          Next we compare <strong>three different admissible executions</strong> A, B and C.
+          Because they are different executions, the set of honest and Byzantine parties
+          is allowed to change between them.
         </div>
-
-        <div class="ind-equation">
-          a₂ ↔ v₂
-        </div>
-
-        The system itself is not a normal
-        execution yet. It is a device used
-        to compare several executions of
-        the original protocol.
-
       </div>
     `;
-
     return;
   }
-
 
   if (stage === 2) {
-    const execution =
-      getExecution(
-        scenario,
-        "A"
-      );
-
-
-    root.innerHTML = `
-      <div class="ind-proof-card">
-
-        <div class="ind-proof-title">
-          EXECUTION A
-        </div>
-
-        <div class="ind-proof-row">
-          <span>Honest</span>
-
-          <strong>
-            ${formatPartyList(
-              execution.honest
-            )}
-          </strong>
-        </div>
-
-        <div class="ind-proof-row">
-          <span>Byzantine simulators</span>
-
-          <strong>
-            ${formatPartyList(
-              execution.simulators
-            )}
-          </strong>
-        </div>
-
-        <div class="ind-proof-arrow">
-          ↓
-        </div>
-
-        <div class="ind-equation">
-          a₂ ↔ v₂
-        </div>
-
-        <p>
-          Since a₂ and v₂ are honest
-          mutual favorites, simplified
-          stability forces them to match.
-        </p>
-
-        <div class="ind-conclusion pass">
-          a₂ decides v₂
-        </div>
-
-      </div>
-    `;
-
+    renderExecutionExplanation(root, "A");
     return;
   }
-
 
   if (stage === 3) {
-    const execution =
-      getExecution(
-        scenario,
-        "B"
-      );
-
-
-    root.innerHTML = `
-      <div class="ind-proof-card">
-
-        <div class="ind-proof-title">
-          EXECUTION B
-        </div>
-
-        <div class="ind-proof-row">
-          <span>Honest</span>
-
-          <strong>
-            ${formatPartyList(
-              execution.honest
-            )}
-          </strong>
-        </div>
-
-        <div class="ind-proof-row">
-          <span>Byzantine simulators</span>
-
-          <strong>
-            ${formatPartyList(
-              execution.simulators
-            )}
-          </strong>
-        </div>
-
-        <div class="ind-proof-arrow">
-          ↓
-        </div>
-
-        <div class="ind-equation">
-          c₁ ↔ v₁
-        </div>
-
-        <p>
-          Since c₁ and v₁ are honest
-          mutual favorites, simplified
-          stability forces them to match.
-        </p>
-
-        <div class="ind-conclusion pass">
-          c₁ decides v₁
-        </div>
-
-      </div>
-    `;
-
+    renderExecutionExplanation(root, "B");
     return;
   }
 
-
-  renderFinalContradiction(
-    root
-  );
+  renderFinalExplanation(root);
 }
 
-
-/* ================================================================
-   FINAL CONTRADICTION
-   ================================================================ */
-
-function renderFinalContradiction(
-  root
-) {
-  const execution =
-    getExecution(
-      scenario,
-      "C"
-    );
-
-  const contradiction =
-    evaluateIndistinguishabilityContradiction(
-      scenario
-    );
-
+function renderExecutionExplanation(root, executionKey) {
+  const execution = getExecution(scenario, executionKey);
+  const [left, right] = execution.forcedMatches[0];
 
   root.innerHTML = `
     <div class="ind-proof-card">
+      <div class="ind-proof-title">EXECUTION ${executionKey}</div>
 
-      <div class="ind-proof-title">
-        EXECUTION C
+      <div class="ind-execution-separate">
+        Separate hypothetical execution — not the next round.
+        The corruption set is chosen independently for this execution.
       </div>
 
       <div class="ind-proof-row">
-        <span>Honest</span>
-
-        <strong>
-          ${formatPartyList(
-            execution.honest
-          )}
-        </strong>
+        <span>Honest parties</span>
+        <strong>${formatPartyList(execution.honest)}</strong>
       </div>
 
       <div class="ind-proof-row">
         <span>Byzantine simulators</span>
-
-        <strong>
-          ${formatPartyList(
-            execution.simulators
-          )}
-        </strong>
+        <strong>${formatPartyList(execution.simulators)}</strong>
       </div>
 
-
-      <div class="ind-view-grid">
-
-        <div class="ind-view-card">
-
-          <strong>
-            a₂
-          </strong>
-
-          <span>
-            cannot distinguish
-            Execution C from A
-          </span>
-
-          <div class="ind-proof-arrow">
-            ↓
-          </div>
-
-          <div class="ind-equation">
-            a₂ → v
-          </div>
-
-        </div>
-
-
-        <div class="ind-view-card">
-
-          <strong>
-            c₁
-          </strong>
-
-          <span>
-            cannot distinguish
-            Execution C from B
-          </span>
-
-          <div class="ind-proof-arrow">
-            ↓
-          </div>
-
-          <div class="ind-equation">
-            c₁ → v
-          </div>
-
-        </div>
-
+      <div class="ind-focus-note">
+        The visualizer intentionally draws only the honest parties. The remaining
+        virtual behaviour is generated by the Byzantine simulators above.
       </div>
 
-
-      <div class="ind-contradiction">
-
-        <strong>
-          CONTRADICTION
-        </strong>
-
-        <div class="ind-equation">
-          a₂ ≠ c₁
+      <div class="ind-causal-chain">
+        <div class="ind-chain-step">
+          <span class="ind-chain-label">Relevant fact</span>
+          <div class="ind-equation">${prettyParty(left)} ↔ ${prettyParty(right)}</div>
         </div>
 
-        <div class="ind-equation">
-          out(a₂) = out(c₁) = v
+        <div class="ind-proof-arrow">↓</div>
+
+        <div class="ind-chain-step">
+          <span class="ind-chain-label">Because both are honest</span>
+          <strong>Simplified stability forces the match.</strong>
         </div>
 
-        <p>
-          ${contradiction.explanation}
-        </p>
+        <div class="ind-proof-arrow">↓</div>
 
-        <div class="ind-conclusion fail">
-          ✕ Non-Competition
+        <div class="ind-conclusion pass">
+          Remember: ${prettyParty(left)} decides ${prettyParty(right)}
         </div>
-
       </div>
-
     </div>
   `;
 }
 
+function renderFinalExplanation(root) {
+  const execution = getExecution(scenario, "C");
+  const contradiction = evaluateIndistinguishabilityContradiction(scenario);
 
-/* ================================================================
-   VIRTUAL NODE RENDERING
-   ================================================================ */
+  root.innerHTML = `
+    <div class="ind-proof-card">
+      <div class="ind-proof-title">EXECUTION C</div>
 
-function drawAllVirtualParties(
-  svg,
-  positions,
-  execution
-) {
-  for (
-    const party
-    of scenario.duplicated.L
-  ) {
-    drawVirtualParty(
-      svg,
-      party,
-      positions[party],
-      execution
-    );
-  }
+      <div class="ind-execution-separate">
+        A third, separate execution. This is the point where the two earlier
+        observations are combined through indistinguishability.
+      </div>
 
+      <div class="ind-proof-row">
+        <span>Honest parties</span>
+        <strong>${formatPartyList(execution.honest)}</strong>
+      </div>
 
-  for (
-    const party
-    of scenario.duplicated.R
-  ) {
-    drawVirtualParty(
-      svg,
-      party,
-      positions[party],
-      execution
-    );
-  }
+      <div class="ind-proof-row">
+        <span>Byzantine simulators</span>
+        <strong>${formatPartyList(execution.simulators)}</strong>
+      </div>
+
+      <div class="ind-final-sequence">
+        <div class="ind-final-step">
+          <span class="ind-final-step-number">1</span>
+          <div>
+            <strong>Local view of a₂</strong>
+            <p>
+              Execution C is indistinguishable from A to a₂. Therefore a₂
+              must repeat the decision forced in A and act as if its target
+              were v₂.
+            </p>
+          </div>
+        </div>
+
+        <div class="ind-final-step">
+          <span class="ind-final-step-number">2</span>
+          <div>
+            <strong>Local view of c₁</strong>
+            <p>
+              Execution C is indistinguishable from B to c₁. Therefore c₁
+              must repeat the decision forced in B and act as if its target
+              were v₁.
+            </p>
+          </div>
+        </div>
+
+        <div class="ind-final-step collapse">
+          <span class="ind-final-step-number">3</span>
+          <div>
+            <strong>Collapse the virtual copies</strong>
+            <p>
+              The names v₁ and v₂ only distinguish virtual vertices in the
+              proof gadget. In Execution C they are simulated views of the
+              same real Byzantine party v.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ind-contradiction">
+        <strong>CONTRADICTION</strong>
+        <div class="ind-equation">a₂ ≠ c₁</div>
+        <div class="ind-equation">out(a₂) = out(c₁) = v</div>
+        <p>${contradiction.explanation}</p>
+        <div class="ind-conclusion fail">✕ Non-Competition</div>
+      </div>
+    </div>
+  `;
 }
 
-
-function drawVirtualParty(
-  svg,
-  party,
-  position,
-  execution
-) {
-  const colors =
-    getColors();
-
-  const side =
-    getPartySide(
-      party
-    );
-
-  const fill =
-    side === "L"
-      ? colors.partyL
-      : colors.partyR;
-
-
-  const honest =
-    !execution ||
-    execution.honest.includes(
-      party
-    );
-
-
-  const opacity =
-    honest
-      ? 1
-      : 0.28;
-
-
-  /*
-   * Simulated virtual nodes get
-   * an outer dashed Byzantine ring.
-   */
-
-  if (
-    execution &&
-    !honest
-  ) {
-    svg.appendChild(
-      svgElement(
-        "circle",
-        {
-          cx:
-            position.x,
-
-          cy:
-            position.y,
-
-          r:
-            27,
-
-          fill:
-            "none",
-
-          stroke:
-            colors.byzantine,
-
-          "stroke-width":
-            2,
-
-          "stroke-dasharray":
-            "5 4",
-
-          opacity:
-            0.65,
-        }
-      )
-    );
-  }
-
-
-  drawParty(
-    svg,
-    party,
-    position,
-    fill,
-    {
-      radius: 21,
-      opacity,
-    }
-  );
-}
-
-
 /* ================================================================
-   COLLAPSED PARTY VISUALIZATION
+   SCENE HELPERS
    ================================================================ */
 
-function drawCollapsedPartyRelation(
-  svg,
-  first,
-  second,
-  color
-) {
-  const x =
-    Math.max(
-      first.x,
-      second.x
-    ) + 62;
+function drawSceneTitle(svg, title, subtitle) {
+  const colors = getColors();
 
+  drawText(svg, 380, 30, title, {
+    fill: colors.brandPurple,
+    size: 15,
+    weight: 900,
+  });
 
-  svg.appendChild(
-    svgElement(
-      "line",
-      {
-        x1: x,
-        y1: first.y,
-
-        x2: x,
-        y2: second.y,
-
-        stroke:
-          color,
-
-        "stroke-width":
-          2.5,
-
-        "stroke-dasharray":
-          "6 5",
-      }
-    )
-  );
-
-
-  svg.appendChild(
-    svgElement(
-      "line",
-      {
-        x1:
-          first.x + 24,
-
-        y1:
-          first.y,
-
-        x2:
-          x,
-
-        y2:
-          first.y,
-
-        stroke:
-          color,
-
-        "stroke-width":
-          2.5,
-
-        "stroke-dasharray":
-          "6 5",
-      }
-    )
-  );
-
-
-  svg.appendChild(
-    svgElement(
-      "line",
-      {
-        x1:
-          second.x + 24,
-
-        y1:
-          second.y,
-
-        x2:
-          x,
-
-        y2:
-          second.y,
-
-        stroke:
-          color,
-
-        "stroke-width":
-          2.5,
-
-        "stroke-dasharray":
-          "6 5",
-      }
-    )
-  );
-
-
-  drawText(
-    svg,
-    x - 8,
-    (
-      first.y +
-      second.y
-    ) / 2,
-    "same Byzantine v",
-    {
-      fill:
-        color,
-
-      size:
-        10,
-
-      weight:
-        800,
-
-      anchor:
-        "end",
-    }
-  );
+  drawText(svg, 380, 56, subtitle, {
+    fill: colors.muted,
+    size: 11.5,
+    weight: 600,
+  });
 }
 
+function drawSideLabels(svg, colors, y = 100) {
+  drawText(svg, 175, y, "L", {
+    fill: colors.partyL,
+    size: 15,
+    weight: 900,
+  });
 
-/* ================================================================
-   EXECUTION / VIEW BADGES
-   ================================================================ */
+  drawText(svg, 585, y, "R", {
+    fill: colors.partyR,
+    size: 15,
+    weight: 900,
+  });
+}
 
-function drawExecutionBadge(
-  svg,
-  execution,
-  simulators
-) {
-  const colors =
-    getColors();
+function drawBottomNote(svg, text, color, y = 525) {
+  drawRoundedLabel(svg, 380, y, text, color, {
+    width: 570,
+    height: 34,
+    fontSize: 11,
+    opaque: true,
+  });
+}
 
-
+function drawSimulatorBox(svg, simulators, colors) {
   drawRoundedLabel(
     svg,
     380,
-    25,
-    `EXECUTION ${execution}`,
-    colors.brandPurple
+    485,
+    `Byzantine simulators: ${formatPartyList(simulators)}`,
+    colors.byzantine,
+    { width: 280, height: 30, fontSize: 11, opaque: true }
   );
-
 
   drawText(
     svg,
     380,
-    420,
-    `Byzantine simulators: ${formatPartyList(simulators)}`,
+    525,
+    "They generate the remaining virtual behaviour; omitted nodes are not part of this focused view.",
     {
-      fill:
-        colors.byzantine,
-
-      size:
-        11,
-
-      weight:
-        700,
+      fill: colors.muted,
+      size: 10.5,
+      weight: 600,
     }
   );
 }
 
+function drawDecisionBadge(svg, x, y, text, color, width = 250) {
+  drawRoundedLabel(svg, x, y, text, color, {
+    width,
+    height: 34,
+    fontSize: 11,
+    opaque: true,
+  });
+}
 
-function drawViewBadge(
+function drawViewCard(svg, x, y, text, color) {
+  drawRoundedLabel(svg, x, y, text, color, {
+    width: 235,
+    height: 30,
+    fontSize: 10.5,
+    opaque: true,
+  });
+}
+
+function drawMultiLineCard(
   svg,
   x,
   y,
-  label,
-  color
+  lines,
+  color,
+  { width = 280, height = 70 } = {}
 ) {
-  drawRoundedLabel(
-    svg,
-    x,
-    y,
-    label,
-    color,
-    {
-      width: 108,
-      height: 24,
-    }
+  const colors = getColors();
+
+  svg.appendChild(
+    svgElement("rect", {
+      x: x - width / 2,
+      y: y - height / 2,
+      width,
+      height,
+      rx: 9,
+      fill: colors.surface,
+      stroke: color,
+      "stroke-opacity": 0.35,
+      "stroke-width": 1.2,
+    })
   );
+
+  const lineGap = 22;
+  const startY = y - ((lines.length - 1) * lineGap) / 2 + 4;
+
+  lines.forEach((line, index) => {
+    drawText(svg, x, startY + index * lineGap, line, {
+      fill: index === 0 ? color : colors.muted,
+      size: index === 0 ? 11 : 10.5,
+      weight: index === 0 ? 800 : 650,
+    });
+  });
 }
-
-
-/* ================================================================
-   DUPLICATED GRAPH LABELS
-   ================================================================ */
-
-function drawDuplicatedLabels(
-  svg,
-  colors
-) {
-  drawText(
-    svg,
-    175,
-    32,
-    "L",
-    {
-      fill:
-        colors.partyL,
-
-      size:
-        14,
-
-      weight:
-        800,
-    }
-  );
-
-
-  drawText(
-    svg,
-    585,
-    32,
-    "R",
-    {
-      fill:
-        colors.partyR,
-
-      size:
-        14,
-
-      weight:
-        800,
-    }
-  );
-
-
-  drawText(
-    svg,
-    380,
-    62,
-    "COPY 1",
-    {
-      fill:
-        colors.muted,
-
-      size:
-        10,
-
-      weight:
-        700,
-    }
-  );
-
-
-  drawText(
-    svg,
-    380,
-    250,
-    "COPY 2",
-    {
-      fill:
-        colors.muted,
-
-      size:
-        10,
-
-      weight:
-        700,
-    }
-  );
-}
-
 
 /* ================================================================
    POSITIONS
@@ -1264,288 +638,177 @@ function drawDuplicatedLabels(
 
 function getDuplicatedPositions() {
   return {
-    a1: {
-      x: 175,
-      y: 95,
-    },
-
-    b1: {
-      x: 175,
-      y: 145,
-    },
-
-    c1: {
-      x: 175,
-      y: 195,
-    },
-
-
-    a2: {
-      x: 175,
-      y: 285,
-    },
-
-    b2: {
-      x: 175,
-      y: 335,
-    },
-
-    c2: {
-      x: 175,
-      y: 385,
-    },
-
-
-    u1: {
-      x: 585,
-      y: 95,
-    },
-
-    v1: {
-      x: 585,
-      y: 145,
-    },
-
-    w1: {
-      x: 585,
-      y: 195,
-    },
-
-
-    u2: {
-      x: 585,
-      y: 285,
-    },
-
-    v2: {
-      x: 585,
-      y: 335,
-    },
-
-    w2: {
-      x: 585,
-      y: 385,
-    },
+    a1: { x: 175, y: 165 },
+    b1: { x: 175, y: 220 },
+    c1: { x: 175, y: 275 },
+    a2: { x: 175, y: 370 },
+    b2: { x: 175, y: 425 },
+    c2: { x: 175, y: 480 },
+    u1: { x: 585, y: 165 },
+    v1: { x: 585, y: 220 },
+    w1: { x: 585, y: 275 },
+    u2: { x: 585, y: 370 },
+    v2: { x: 585, y: 425 },
+    w2: { x: 585, y: 480 },
   };
 }
 
+function getExecutionPositions(execution) {
+  const left = execution.honest.filter(party => getPartySide(party) === "L");
+  const right = execution.honest.filter(party => getPartySide(party) === "R");
+
+  const positions = {};
+  const ys = [245, 355];
+
+  left.forEach((party, index) => {
+    positions[party] = { x: 175, y: ys[index] ?? 300 };
+  });
+
+  right.forEach((party, index) => {
+    positions[party] = { x: 585, y: ys[index] ?? 300 };
+  });
+
+  return positions;
+}
 
 /* ================================================================
    STATUS
    ================================================================ */
 
 function updateStatus() {
-  const status =
-    document.getElementById(
-      "ind-step-n"
-    );
-
-
-  if (!status) {
-    return;
-  }
-
+  const status = document.getElementById("ind-step-n");
+  if (!status) return;
 
   const labels = {
-    0:
-      "—",
-
-    1:
-      "1 / 4 · Duplicated system",
-
-    2:
-      "2 / 4 · Execution A",
-
-    3:
-      "3 / 4 · Execution B",
-
-    4:
-      "4 / 4 · Contradiction",
+    0: "—",
+    1: "1 / 4 · Build proof gadget",
+    2: "2 / 4 · Execution A",
+    3: "3 / 4 · Execution B",
+    4: "4 / 4 · Execution C → contradiction",
   };
 
-
-  status.textContent =
-    labels[stage];
+  status.textContent = labels[stage];
 }
 
+function updateControls() {
+  const start = document.getElementById("ind-start");
+  const back = document.getElementById("ind-back");
+  const next = document.getElementById("ind-next");
 
-function setNextEnabled(
-  enabled
-) {
-  const button =
-    document.getElementById(
-      "ind-next"
-    );
-
-
-  if (!button) {
-    return;
+  if (start) {
+    start.disabled = stage > 0;
   }
 
+  if (back) {
+    back.disabled = stage === 0;
+  }
 
-  button.disabled =
-    !enabled;
+  if (next) {
+    next.disabled = stage === 0 || stage === 4;
+  }
 }
-
 
 /* ================================================================
-   DRAWING HELPERS
+   SVG HELPERS
    ================================================================ */
 
-function drawParty(
-  svg,
-  party,
-  position,
-  color,
-  {
-    radius = 28,
-    opacity = 1,
-  } = {}
-) {
+function drawParty(svg, party, position, color, { radius = 28 } = {}) {
   svg.appendChild(
-    svgElement(
-      "circle",
-      {
-        cx:
-          position.x,
-
-        cy:
-          position.y,
-
-        r:
-          radius,
-
-        fill:
-          color,
-
-        stroke:
-          "#FFFFFF",
-
-        "stroke-width":
-          3,
-
-        opacity,
-      }
-    )
+    svgElement("circle", {
+      cx: position.x,
+      cy: position.y,
+      r: radius,
+      fill: color,
+      stroke: "#FFFFFF",
+      "stroke-width": 4,
+    })
   );
 
-
-  drawText(
-    svg,
-    position.x,
-    position.y + 5,
-    prettyParty(party),
-    {
-      fill:
-        "#FFFFFF",
-
-      size:
-        radius <= 21
-          ? 13
-          : 17,
-
-      weight:
-        800,
-
-      opacity,
-    }
-  );
+  drawText(svg, position.x, position.y + 5, prettyParty(party), {
+    fill: "#FFFFFF",
+    size: radius <= 24 ? 14 : 18,
+    weight: 900,
+  });
 }
 
+function drawByzantineParty(svg, party, position, color, byzantineColor) {
+  svg.appendChild(
+    svgElement("circle", {
+      cx: position.x,
+      cy: position.y,
+      r: 39,
+      fill: "none",
+      stroke: byzantineColor,
+      "stroke-width": 4,
+      "stroke-dasharray": "7 5",
+    })
+  );
 
-function drawEdge(
-  svg,
-  from,
-  to,
-  {
-    color,
-    width = 3,
-    dashed = false,
-    opacity = 1,
-  }
-) {
-  const line =
-    svgElement(
-      "line",
-      {
-        x1:
-          from.x,
+  drawParty(svg, party, position, color, { radius: 31 });
 
-        y1:
-          from.y,
+  svg.appendChild(
+    svgElement("circle", {
+      cx: position.x + 29,
+      cy: position.y - 29,
+      r: 13,
+      fill: byzantineColor,
+      stroke: "#FFFFFF",
+      "stroke-width": 2,
+    })
+  );
 
-        x2:
-          to.x,
+  drawText(svg, position.x + 29, position.y - 25, "B", {
+    fill: "#FFFFFF",
+    size: 11,
+    weight: 900,
+  });
+}
 
-        y2:
-          to.y,
+function drawEdge(svg, from, to, { color, width = 3, dashed = false }) {
+  const endpoints = shortenLine(from, to, 34, 34);
 
-        stroke:
-          color,
-
-        "stroke-width":
-          width,
-
-        "stroke-linecap":
-          "round",
-
-        opacity,
-      }
-    );
-
+  const line = svgElement("line", {
+    x1: endpoints.x1,
+    y1: endpoints.y1,
+    x2: endpoints.x2,
+    y2: endpoints.y2,
+    stroke: color,
+    "stroke-width": width,
+    "stroke-linecap": "round",
+  });
 
   if (dashed) {
-    line.setAttribute(
-      "stroke-dasharray",
-      "7 6"
-    );
+    line.setAttribute("stroke-dasharray", "7 6");
   }
 
-
-  svg.appendChild(
-    line
-  );
+  svg.appendChild(line);
 }
 
+function shortenLine(from, to, startOffset, endOffset) {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const length = Math.hypot(dx, dy) || 1;
+  const ux = dx / length;
+  const uy = dy / length;
 
-function drawSmallEdgeLabel(
-  svg,
-  from,
-  to,
-  label,
-  color
-) {
-  const x =
-    (
-      from.x +
-      to.x
-    ) / 2;
-
-  const y =
-    (
-      from.y +
-      to.y
-    ) / 2 - 9;
-
-
-  drawText(
-    svg,
-    x,
-    y,
-    label,
-    {
-      fill:
-        color,
-
-      size:
-        9,
-
-      weight:
-        700,
-    }
-  );
+  return {
+    x1: from.x + ux * startOffset,
+    y1: from.y + uy * startOffset,
+    x2: to.x - ux * endOffset,
+    y2: to.y - uy * endOffset,
+  };
 }
 
+function drawEdgeLabel(svg, from, to, label, color, yOffset = -10) {
+  const x = (from.x + to.x) / 2;
+  const y = (from.y + to.y) / 2 + yOffset;
+
+  drawText(svg, x, y, label, {
+    fill: color,
+    size: 9.5,
+    weight: 800,
+  });
+}
 
 function drawRoundedLabel(
   svg,
@@ -1553,61 +816,31 @@ function drawRoundedLabel(
   y,
   text,
   color,
-  {
-    width = 120,
-    height = 26,
-  } = {}
+  { width = 120, height = 26, fontSize = 10.5, opaque = false } = {}
 ) {
+  const colors = getColors();
+
   svg.appendChild(
-    svgElement(
-      "rect",
-      {
-        x:
-          x - width / 2,
-
-        y:
-          y - height / 2,
-
-        width,
-        height,
-
-        rx:
-          7,
-
-        fill:
-          color,
-
-        opacity:
-          0.1,
-
-        stroke:
-          color,
-
-        "stroke-width":
-          1,
-      }
-    )
+    svgElement("rect", {
+      x: x - width / 2,
+      y: y - height / 2,
+      width,
+      height,
+      rx: 7,
+      fill: opaque ? colors.surface : color,
+      "fill-opacity": opaque ? 0.96 : 0.08,
+      stroke: color,
+      "stroke-opacity": 0.35,
+      "stroke-width": 1,
+    })
   );
 
-
-  drawText(
-    svg,
-    x,
-    y + 4,
-    text,
-    {
-      fill:
-        color,
-
-      size:
-        9,
-
-      weight:
-        800,
-    }
-  );
+  drawText(svg, x, y + 4, text, {
+    fill: color,
+    size: fontSize,
+    weight: 800,
+  });
 }
-
 
 function drawText(
   svg,
@@ -1619,197 +852,69 @@ function drawText(
     size = 12,
     weight = 400,
     anchor = "middle",
-    opacity = 1,
   } = {}
 ) {
-  const element =
-    svgElement(
-      "text",
-      {
-        x,
-        y,
+  const element = svgElement("text", {
+    x,
+    y,
+    "text-anchor": anchor,
+    "font-family": "JetBrains Mono, Fira Code, Consolas, monospace",
+    "font-size": size,
+    "font-weight": weight,
+    fill,
+  });
 
-        "text-anchor":
-          anchor,
-
-        "font-family":
-          "JetBrains Mono, Fira Code, Consolas, monospace",
-
-        "font-size":
-          size,
-
-        "font-weight":
-          weight,
-
-        fill,
-
-        opacity,
-      }
-    );
-
-
-  element.textContent =
-    text;
-
-
-  svg.appendChild(
-    element
-  );
+  element.textContent = text;
+  svg.appendChild(element);
 }
 
+function svgElement(tag, attributes) {
+  const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
 
-function svgElement(
-  tag,
-  attributes
-) {
-  const element =
-    document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      tag
-    );
-
-
-  for (
-    const [name, value]
-    of Object.entries(
-      attributes
-    )
-  ) {
-    element.setAttribute(
-      name,
-      value
-    );
+  for (const [name, value] of Object.entries(attributes)) {
+    element.setAttribute(name, value);
   }
-
 
   return element;
 }
 
-
 /* ================================================================
-   COLORS
+   COLORS / TEXT
    ================================================================ */
 
 function getColors() {
-  const style =
-    getComputedStyle(
-      document.documentElement
-    );
-
+  const style = getComputedStyle(document.documentElement);
 
   return {
-    partyL:
-      cssColor(
-        style,
-        "--party-l"
-      ),
-
-    partyR:
-      cssColor(
-        style,
-        "--party-r"
-      ),
-
-    proposal:
-      cssColor(
-        style,
-        "--proposal"
-      ),
-
-    matching:
-      cssColor(
-        style,
-        "--matching"
-      ),
-
-    byzantine:
-      cssColor(
-        style,
-        "--byzantine"
-      ),
-
-    brandOrange:
-      cssColor(
-        style,
-        "--brand-orange"
-      ),
-
-    brandPurple:
-      cssColor(
-        style,
-        "--brand-purple"
-      ),
-
-    muted:
-      cssColor(
-        style,
-        "--text-muted"
-      ),
+    partyL: cssColor(style, "--party-l"),
+    partyR: cssColor(style, "--party-r"),
+    proposal: cssColor(style, "--proposal"),
+    matching: cssColor(style, "--matching"),
+    byzantine: cssColor(style, "--byzantine"),
+    surface: cssColor(style, "--surface"),
+    brandOrange: cssColor(style, "--brand-orange"),
+    brandPurple: cssColor(style, "--brand-purple"),
+    muted: cssColor(style, "--text-muted"),
   };
 }
 
-
-function cssColor(
-  style,
-  variable
-) {
-  return style
-    .getPropertyValue(
-      variable
-    )
-    .trim();
+function cssColor(style, variable) {
+  return style.getPropertyValue(variable).trim();
 }
 
-
-/* ================================================================
-   TEXT HELPERS
-   ================================================================ */
-
-function formatPartyList(
-  parties
-) {
-  return parties
-    .map(
-      prettyParty
-    )
-    .join(", ");
+function formatPartyList(parties) {
+  return parties.map(prettyParty).join(", ");
 }
 
+function prettyParty(party) {
+  const match = String(party).match(/^([a-zA-Z]+)(\d+)?$/);
+  if (!match) return party;
 
-function prettyParty(
-  party
-) {
-  const match =
-    String(party)
-      .match(
-        /^([a-zA-Z]+)(\d+)?$/
-      );
-
-
-  if (!match) {
-    return party;
-  }
-
-
-  const [, name, number] =
-    match;
-
-
-  if (!number) {
-    return name;
-  }
-
-
-  return (
-    name +
-    toSubscript(number)
-  );
+  const [, name, number] = match;
+  return number ? name + toSubscript(number) : name;
 }
 
-
-function toSubscript(
-  value
-) {
+function toSubscript(value) {
   const digits = {
     "0": "₀",
     "1": "₁",
@@ -1823,13 +928,8 @@ function toSubscript(
     "9": "₉",
   };
 
-
   return String(value)
     .split("")
-    .map(
-      digit =>
-        digits[digit] ??
-        digit
-    )
+    .map(digit => digits[digit] ?? digit)
     .join("");
 }

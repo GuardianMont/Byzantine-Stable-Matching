@@ -9,6 +9,7 @@ import {
 import {
   ncInit,
   ncStart,
+  ncBack,
   ncStep,
   ncReset,
 } from "./examples/noncompetition-ui.js";
@@ -16,6 +17,7 @@ import {
 import {
   indInit,
   indStart,
+  indBack,
   indStep,
   indReset,
 } from "./examples/indistinguishability-ui.js";
@@ -98,11 +100,13 @@ window.gsReset = gsReset;
 
 window.ncInit = ncInit;
 window.ncStart = ncStart;
+window.ncBack = ncBack;
 window.ncStep = ncStep;
 window.ncReset = ncReset;
 
 window.indInit = indInit;
 window.indStart = indStart;
+window.indBack = indBack;
 window.indStep = indStep;
 window.indReset = indReset;
 /* ================================================================

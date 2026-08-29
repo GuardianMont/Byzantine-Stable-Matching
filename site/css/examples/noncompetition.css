@@ -9,7 +9,7 @@
   color: var(--text-muted);
 
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11.5px;
   font-weight: 700;
 }
 
@@ -100,15 +100,15 @@
 
   color: var(--text-main);
 
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
 .property-detail {
   color: var(--text-muted);
 
-  font-size: 11px;
-  line-height: 1.45;
+  font-size: 12px;
+  line-height: 1.55;
 }
 
 
@@ -126,8 +126,8 @@
 
   color: var(--text-muted);
 
-  font-size: 12px;
-  line-height: 1.6;
+  font-size: 13px;
+  line-height: 1.65;
 }
 
 .nc-message strong {
@@ -161,7 +161,7 @@
   font-family:
     var(--mono);
 
-  font-size: 11px;
+  font-size: 13px;
 }
 
 
@@ -184,9 +184,9 @@
   color:
     var(--text-muted);
 
-  font-size: 11px;
+  font-size: 12px;
 
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
 .nc-violation-summary strong {
@@ -210,4 +210,16 @@
   border:
     2px solid
     var(--byzantine);
+}
+
+
+/* 8.2 proof navigation */
+.nc-controls {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 520px) {
+  .nc-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

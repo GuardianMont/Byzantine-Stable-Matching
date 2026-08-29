@@ -680,13 +680,23 @@
 
                 <div class="panel-body">
 
-                  <div class="btn-group">
+                  <div class="btn-group nc-controls">
 
                     <button
                       class="btn btn-primary"
+                      id="nc-start"
                       onclick="ncStart()"
                     >
                       ▶ Start
+                    </button>
+
+                    <button
+                      class="btn btn-secondary"
+                      id="nc-back"
+                      onclick="ncBack()"
+                      disabled
+                    >
+                      ← Back
                     </button>
 
                     <button
@@ -695,7 +705,7 @@
                       onclick="ncStep()"
                       disabled
                     >
-                      → Next Step
+                      Next →
                     </button>
 
                     <button
@@ -1043,13 +1053,23 @@
 
                 <div class="panel-body">
 
-                  <div class="btn-group">
+                  <div class="btn-group ind-controls">
 
                     <button
                       class="btn btn-primary"
+                      id="ind-start"
                       onclick="indStart()"
                     >
                       ▶ Start
+                    </button>
+
+                    <button
+                      class="btn btn-secondary"
+                      id="ind-back"
+                      onclick="indBack()"
+                      disabled
+                    >
+                      ← Back
                     </button>
 
                     <button
@@ -1058,7 +1078,7 @@
                       onclick="indStep()"
                       disabled
                     >
-                      → Next Step
+                      Next →
                     </button>
 
                     <button
@@ -1097,10 +1117,11 @@
                     </span>
 
                     <span>
-                      The proof duplicates each original
-                      party into two virtual copies and
-                      compares executions that selected
-                      honest parties cannot distinguish.
+                      The proof first builds a duplicated proof gadget.
+                      The subscripts 1 and 2 identify virtual vertices,
+                      not consecutive rounds. Executions A, B and C are
+                      three different hypothetical executions, so the
+                      honest/Byzantine set may change between them.
                     </span>
 
                   </div>
@@ -1132,7 +1153,7 @@
               <div class="status-strip">
 
                 <span>
-                  Step
+                  Proof stage
                 </span>
 
                 <strong id="ind-step-n">
@@ -1189,10 +1210,10 @@
                     <div class="legend-item">
 
                       <div
-                        class="legend-dot simulated"
+                        class="legend-dot byzantine"
                       ></div>
 
-                      Simulated
+                      Byzantine
 
                     </div>
 
@@ -1203,7 +1224,7 @@
                         class="legend-dot matching"
                       ></div>
 
-                      Forced match
+                      Forced decision
 
                     </div>
 
