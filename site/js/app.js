@@ -22,6 +22,14 @@ import {
   indReset,
 } from "./examples/indistinguishability-ui.js";
 
+import {
+  pbInit,
+  pbStart,
+  pbBack,
+  pbStep,
+  pbReset,
+} from "./examples/pibsm-ui.js";
+
 /* ================================================================
    NAVIGATION
    ================================================================ */
@@ -109,6 +117,12 @@ window.indStart = indStart;
 window.indBack = indBack;
 window.indStep = indStep;
 window.indReset = indReset;
+window.pbInit = pbInit;
+window.pbStart = pbStart;
+window.pbBack = pbBack;
+window.pbStep = pbStep;
+window.pbReset = pbReset;
+
 /* ================================================================
    APPLICATION INITIALIZATION
    ================================================================ */
@@ -117,6 +131,7 @@ function initApplication() {
   gsInit();
   ncInit();
   indInit();
+  pbInit();
 
   console.info(
     "Byzantine Stable Matching Interactive Companion initialized."

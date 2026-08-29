@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="./css/examples/noncompetition.css" />
   <link rel="stylesheet" href="./css/responsive.css" />
   <link rel="stylesheet" href="./css/examples/indistinguishability.css" />
+  <link rel="stylesheet" href="./css/examples/pibsm.css" />
 </head>
 
 
@@ -67,7 +68,7 @@
       <div class="sidebar-section">
 
         <div class="sidebar-section-label">
-          Paper Examples
+          Manuscript Examples
         </div>
 
         <div
@@ -82,7 +83,7 @@
           </span>
 
           <span class="nav-tag">
-            paper
+            guided
           </span>
         </div>
 
@@ -100,7 +101,7 @@
           </span>
 
           <span class="nav-tag">
-            paper
+            guided
           </span>
         </div>
 
@@ -118,25 +119,25 @@
           </span>
 
           <span class="nav-tag">
-            paper
+            guided
           </span>
-        </div>
-      </div>
-
-
-      <div class="sidebar-section">
-
-        <div class="sidebar-section-label">
-          Coming Next
         </div>
 
         <div
-          class="nav-item disabled"
+          class="nav-item"
+          data-screen="ex-84"
+          onclick="navigate(this, 'ex-84')"
         >
           <span class="nav-badge">8.4</span>
-          <span>ΠbSM</span>
-        </div>
 
+          <span>
+            ΠbSM Trace
+          </span>
+
+          <span class="nav-tag">
+            guided
+          </span>
+        </div>
       </div>
 
 
@@ -182,7 +183,7 @@
               Stable Matching
             </em>.
             The examples reproduce the constructions discussed
-            in the paper and allow their parameters to be modified
+            in the manuscript and allow their parameters to be modified
             interactively.
           </p>
 
@@ -228,6 +229,20 @@
               "
             >
               8.3 · Indistinguishability
+            </button>
+
+            <button
+              class="quick-link"
+              onclick="
+                navigate(
+                  document.querySelector(
+                    '[data-screen=ex-84]'
+                  ),
+                  'ex-84'
+                )
+              "
+            >
+              8.4 · ΠbSM Execution Trace
             </button>
 
           </div>
@@ -1287,6 +1302,281 @@
         </div>
 
       </section>
+
+      <!-- ========================================================
+           EXAMPLE 8.4
+           ======================================================== -->
+
+      <section
+        class="screen"
+        id="screen-ex-84"
+      >
+
+        <div class="example-header">
+
+          <div class="breadcrumb">
+            examples /
+            <span>8.4</span>
+          </div>
+
+          <h2>
+            Π<sub>bSM</sub> Execution Trace
+          </h2>
+
+          <p>
+            Follow the constructive protocol in a fixed authenticated
+            bipartite execution: simulate communication inside L, run BB and BA
+            in parallel to reconstruct the σ-values, check for ⊥, execute
+            Gale–Shapley locally, and let R decide from the received suggestions.
+          </p>
+
+          <div class="paper-ref">
+            Chapter 7 · Constructive Protocol Π<sub>bSM</sub>
+          </div>
+
+        </div>
+
+
+        <div class="content-area">
+
+          <div class="example-layout">
+
+
+            <!-- ==================================================
+                 LEFT COLUMN
+                 ================================================== -->
+
+            <div class="left-stack">
+
+
+              <!-- Scenario -->
+
+              <div class="panel">
+
+                <div class="panel-header">
+                  <span class="panel-title">
+                    Fixed Scenario
+                  </span>
+                </div>
+
+                <div class="panel-body">
+
+                  <div class="ind-setup-grid">
+
+                    <div class="ind-setup-row">
+                      <span class="ind-setup-label">Topology</span>
+                      <span class="ind-setup-value">bipartite</span>
+                    </div>
+
+                    <div class="ind-setup-row">
+                      <span class="ind-setup-label">Authentication</span>
+                      <span class="ind-setup-value">signatures</span>
+                    </div>
+
+                    <div class="ind-setup-row">
+                      <span class="ind-setup-label">k</span>
+                      <span class="ind-setup-value">3</span>
+                    </div>
+
+                    <div class="ind-setup-row">
+                      <span class="ind-setup-label">Faults</span>
+                      <span class="ind-setup-value">tL = 0 · tR = 1</span>
+                    </div>
+
+                    <div class="ind-setup-row">
+                      <span class="ind-setup-label">Byzantine</span>
+                      <span class="ind-setup-value">r₃</span>
+                    </div>
+
+                    <div class="ind-setup-row">
+                      <span class="ind-setup-label">Protocol bound</span>
+                      <span class="ind-setup-value">tL &lt; k/3 ✓</span>
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <!-- Controls -->
+
+              <div class="panel">
+
+                <div class="panel-header">
+                  <span class="panel-title">
+                    Controls
+                  </span>
+                </div>
+
+                <div class="panel-body">
+
+                  <div class="btn-group pb-controls">
+
+                    <button
+                      class="btn btn-primary"
+                      id="pb-start"
+                      onclick="pbStart()"
+                    >
+                      ▶ Start
+                    </button>
+
+                    <button
+                      class="btn btn-secondary"
+                      id="pb-back"
+                      onclick="pbBack()"
+                      disabled
+                    >
+                      ← Back
+                    </button>
+
+                    <button
+                      class="btn btn-secondary"
+                      id="pb-next"
+                      onclick="pbStep()"
+                      disabled
+                    >
+                      Next →
+                    </button>
+
+                    <button
+                      class="btn btn-ghost"
+                      onclick="pbReset()"
+                    >
+                      ⟳ Reset
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <!-- Protocol map -->
+
+              <div class="panel">
+
+                <div class="panel-header">
+                  <span class="panel-title">
+                    Protocol Map
+                  </span>
+                </div>
+
+                <div class="panel-body">
+
+                  <div class="interaction-hint">
+                    <span class="hint-icon">i</span>
+                    <span>
+                      This is a guided protocol trace, not a configurable
+                      adversarial simulator. Use Back and Next to compare
+                      the role of each distributed primitive.
+                    </span>
+                  </div>
+
+                  <div
+                    class="pb-phase-list"
+                    id="pb-phase-list"
+                  ></div>
+
+                </div>
+
+              </div>
+
+
+              <!-- Status -->
+
+              <div class="status-strip">
+                <span>Protocol stage</span>
+                <strong id="pb-step-n">—</strong>
+              </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 RIGHT COLUMN
+                 ================================================== -->
+
+            <div class="right-stack">
+
+
+              <!-- Visualizer -->
+
+              <div class="panel graph-panel">
+
+                <div class="panel-header">
+
+                  <span class="panel-title">
+                    Π<sub>bSM</sub> Visualizer
+                  </span>
+
+                  <div class="legend">
+
+                    <div class="legend-item">
+                      <div class="legend-dot party-l"></div>
+                      L
+                    </div>
+
+                    <div class="legend-item">
+                      <div class="legend-dot party-r"></div>
+                      R
+                    </div>
+
+                    <div class="legend-item">
+                      <div class="legend-dot byzantine"></div>
+                      Byzantine
+                    </div>
+
+                    <div class="legend-item">
+                      <div class="legend-dot matching"></div>
+                      Agreed / matched
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div class="panel-body compact">
+
+                  <div class="canvas-container pb-canvas">
+                    <svg
+                      id="pb-svg"
+                      width="100%"
+                      height="100%"
+                    ></svg>
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <!-- Explanation -->
+
+              <div class="panel trace-panel">
+
+                <div class="panel-header">
+                  <span class="panel-title">
+                    Protocol Trace
+                  </span>
+                </div>
+
+                <div class="panel-body trace-body">
+                  <div id="pb-explanation"></div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
     </main>
 
   </div>
