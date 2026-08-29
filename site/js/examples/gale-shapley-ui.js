@@ -124,7 +124,7 @@ function renderSidePreferences(root, side) {
       : "R — receivers";
 
   heading.style.cssText = `
-    font-size:10px;
+    font-size:13.5px;
     font-weight:700;
     color:var(--text-muted);
     font-family:var(--mono);

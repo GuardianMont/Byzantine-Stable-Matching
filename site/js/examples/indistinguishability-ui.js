@@ -292,11 +292,7 @@ function renderFinalExecution(svg) {
     colors.matching,
     { width: 160, height: 28, fontSize: 10.5, opaque: true }
   );
-
-  drawParty(svg, "a2", positions.a2, colors.partyL, { radius: 33 });
-  drawParty(svg, "c1", positions.c1, colors.partyL, { radius: 33 });
-  drawByzantineParty(svg, "v", positions.v, colors.partyR, colors.byzantine);
-
+  
   drawEdge(svg, positions.a2, positions.v, {
     color: colors.matching,
     width: 5,
@@ -306,6 +302,13 @@ function renderFinalExecution(svg) {
     color: colors.matching,
     width: 5,
   });
+
+
+  drawParty(svg, "a2", positions.a2, colors.partyL, { radius: 33 });
+  drawParty(svg, "c1", positions.c1, colors.partyL, { radius: 33 });
+  drawByzantineParty(svg, "v", positions.v, colors.partyR, colors.byzantine);
+
+  
 
   drawRoundedLabel(
     svg,
