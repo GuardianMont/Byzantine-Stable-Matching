@@ -1,8 +1,13 @@
 # Byzantine Stable Matching — Interactive Companion
 
-Interactive companion for the manuscript **_Stable Matching: from Classical to Byzantine Stable Matching_**.
+This repository accompanies the manuscript *Stable Matching: from Classical to Byzantine Stable Matching*.
+
+It provides interactive and executable visualizations of the main constructions discussed in the manuscript, from the classical Gale–Shapley algorithm to Byzantine failure scenarios, indistinguishability-based impossibility arguments, and the authenticated Pi_bSM constructive protocol.
+
+----
 
 The repository provides small, guided visual examples for the main constructions discussed in the manuscript: classical Gale–Shapley execution, Byzantine equivocation and non-competition, an indistinguishability lower-bound argument, and the constructive authenticated bipartite protocol $\Pi_{\mathrm{bSM}}$.
+
 
 The goal is not to replace the mathematical development in the manuscript. The website is meant to make selected arguments easier to inspect, replay, and compare step by step.
 
@@ -155,3 +160,21 @@ When extending the repository, keep the existing separation:
 4. keep manuscript examples reproducible and deterministic unless configurability is part of the example's purpose.
 
 A more general solvability explorer or configurable Byzantine playground can be added separately without changing the four guided manuscript examples.
+
+## Planned Extensions
+
+The current release focuses on guided and reproducible examples
+corresponding directly to the manuscript.
+
+Future extensions may include:
+
+- **Solvability Explorer** — configure topology, authentication,
+  \(k\), \(t_L\), and \(t_R\), and inspect whether the corresponding
+  bSM setting is solvable.
+
+- **Byzantine Matching Playground** — construct custom preference
+  profiles, select Byzantine parties and adversarial behaviours,
+  and inspect the resulting execution and bSM properties.
+
+These tools are intended as exploratory additions and are kept
+separate from the fixed manuscript examples.
